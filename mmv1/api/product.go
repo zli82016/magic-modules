@@ -17,16 +17,12 @@ import (
 	"log"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
-
-// require 'api/object'
-// require 'api/product/version'
-// require 'google/logger'
-// require 'compile/core'
-// require 'json'
 
 // Represents a product to be managed
 type Product struct {
@@ -74,6 +70,22 @@ type Product struct {
 	ClientName string `yaml:"client_name"`
 }
 
+func (p *Product) UnmarshalYAML(n *yaml.Node) error {
+	log.Printf("zhenhuatest12 object here")
+	type productAlias Product
+	aliasP := (*productAlias)(p)
+	err := n.Decode(&aliasP)
+	if err != nil {
+		return err
+	}
+
+	p.SetApiName()
+
+	log.Printf("zhenhuatest12 tmp %#v", p)
+
+	return nil
+}
+
 func (p *Product) Validate() {
 	// TODO Q1 Rewrite super
 	//     super
@@ -81,8 +93,13 @@ func (p *Product) Validate() {
 		o.ProductMetadata = p
 	}
 
-	p.SetApiName()
+	// p.SetApiName()
 	p.SetDisplayName()
+
+	if p.Async == nil {
+		p.Async = NewOpAsync()
+	}
+	p.Async.Validate()
 }
 
 // def validate
@@ -113,7 +130,9 @@ func (p *Product) Validate() {
 
 func (p *Product) SetApiName() {
 	// The name of the product's API; "compute", "accesscontextmanager"
-	p.ApiName = strings.ToLower(p.Name)
+	if p.ApiName == "" {
+		p.ApiName = strings.ToLower(p.Name)
+	}
 }
 
 // The product full name is the "display name" in string form intended for
