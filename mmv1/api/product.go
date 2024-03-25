@@ -72,14 +72,21 @@ type Product struct {
 
 func (p *Product) UnmarshalYAML(n *yaml.Node) error {
 	log.Printf("zhenhuatest12 object here")
+	p.Async = NewOpAsync()
+	log.Printf("zhenhuatest13 P %#v", p)
+
 	type productAlias Product
 	aliasP := (*productAlias)(p)
+
+	log.Printf("zhenhuatest13 aliasP %#v", aliasP)
+
 	err := n.Decode(&aliasP)
 	if err != nil {
 		return err
 	}
 
 	p.SetApiName()
+	p.SetDisplayName()
 
 	log.Printf("zhenhuatest12 tmp %#v", p)
 
@@ -87,19 +94,11 @@ func (p *Product) UnmarshalYAML(n *yaml.Node) error {
 }
 
 func (p *Product) Validate() {
-	// TODO Q1 Rewrite super
+	// TODO Q2 Rewrite super
 	//     super
 	for _, o := range p.Objects {
 		o.ProductMetadata = p
 	}
-
-	// p.SetApiName()
-	p.SetDisplayName()
-
-	if p.Async == nil {
-		p.Async = NewOpAsync()
-	}
-	p.Async.Validate()
 }
 
 // def validate
@@ -130,9 +129,7 @@ func (p *Product) Validate() {
 
 func (p *Product) SetApiName() {
 	// The name of the product's API; "compute", "accesscontextmanager"
-	if p.ApiName == "" {
-		p.ApiName = strings.ToLower(p.Name)
-	}
+	p.ApiName = strings.ToLower(p.Name)
 }
 
 // The product full name is the "display name" in string form intended for

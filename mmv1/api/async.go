@@ -107,20 +107,15 @@ func NewOpAsync() *OpAsync {
 // end
 
 // def validate
-func (oa *OpAsync) Validate() {
-	//   super
+//   super
 
-	if oa.Operation == nil {
-		oa.Operation = NewOpAsyncOperation()
-	}
-	oa.Operation.Validate()
-	// check :operation, type: Operation, required: true
-	// check :result, type: Result, default: Result.new
-	// check :status, type: Status
-	// check :error, type: Error
-	// check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
-	// check :include_project, type: :boolean, default: false
-}
+//   check :operation, type: Operation, required: true
+//   check :result, type: Result, default: Result.new
+//   check :status, type: Status
+//   check :error, type: Error
+//   check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
+//   check :include_project, type: :boolean, default: false
+// end
 
 // The main implementation of Operation,
 // corresponding to common GCP Operation resources.
@@ -150,23 +145,17 @@ func NewOpAsyncOperation() *OpAsyncOperation {
 }
 
 // def validate
-func (op *OpAsyncOperation) Validate() {
-	//   super
+//   super
 
-	if op.Timeouts == nil {
-		op.Timeouts = NewTimeouts()
-	}
-	op.Timeouts.Validate()
+//   check :kind, type: String
+//   check :path, type: String
+//   check :base_url, type: String
+//   check :wait_ms, type: Integer
 
-	//   check :kind, type: String
-	//   check :path, type: String
-	//   check :base_url, type: String
-	//   check :wait_ms, type: Integer
+//   check :full_url, type: String
 
-	//   check :full_url, type: String
-
-	// conflicts %i[base_url full_url]
-}
+//   conflicts %i[base_url full_url]
+// end
 
 // Represents the results of an Operation request
 type OpAsyncResult struct {
