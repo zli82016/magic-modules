@@ -27,6 +27,8 @@ var version = flag.String("version", "", "optional version name. If specified, t
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
 func main() {
+	convertTemplates()
+
 	flag.Parse()
 	var generateCode = true
 	var generateDocs = true
