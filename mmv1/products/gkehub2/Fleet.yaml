@@ -50,6 +50,10 @@ examples:
     name: "gkehub_fleet_basic"
     skip_test: true
     primary_resource_id: "default"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "gkehub_fleet_compliance_enabled_by_default"
+    skip_test: true
+    primary_resource_id: "default"
 id_format: "projects/{{project}}/locations/global/fleets/default"
 import_format: ["projects/{{project}}/locations/global/fleets/default"]
 properties:
