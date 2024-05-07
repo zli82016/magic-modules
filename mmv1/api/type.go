@@ -21,6 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"golang.org/x/exp/slices"
 )
 
 // Represents a property type
@@ -630,19 +631,25 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 // Ruby does not let you natively change types, so this is the next best
 // thing.
 
-// TODO Q1: check the type of superclasses of property t
+// Checks the type of property t is a class or a super class
 // func (t *Type) is_a?(clazz) {
 func (t Type) IsA(clazz string) bool {
 	if clazz == "" {
 		log.Fatalf("class cannot be empty")
 	}
 
-	if t.NewType != "" {
-		return t.NewType == clazz
+	clazzes := []string{clazz}
+	// KeyValueLabels, KeyValueAnnotations, KeyValueTerraformLabels, KeyValueEffectiveLabels and KeyValueAnnotations are similar to KeyValuePairs,
+	// so these types are also KeyValuePairs. KeyValuePairs is like a super class.
+	if clazz == "KeyValuePairs" {
+		clazzes = append(clazzes, "KeyValueLabels", "KeyValueAnnotations", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations")
 	}
 
-	return t.Type == clazz
-	// super(clazz)
+	if t.NewType != "" {
+		return slices.Contains(clazzes, t.NewType)
+	}
+
+	return slices.Contains(clazzes, t.Type)
 }
 
 // // Overriding class to enable class overrides.

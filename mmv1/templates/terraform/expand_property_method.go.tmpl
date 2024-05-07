@@ -50,7 +50,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   }
   return m, nil
 }
-    {{ else if or ($.IsA "KeyValuePairs") ($.IsA "KeyValueEffectiveLabels") }}{{/* if $.IsA "Map" */}}
+    {{ else if $.IsA "KeyValuePairs" }}{{/* if $.IsA "Map" */}}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
