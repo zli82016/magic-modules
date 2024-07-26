@@ -1,5 +1,5 @@
 resource "google_compute_region_backend_service" "default" {
-  name                            = "backend-service"
+  name                            = "<%= ctx[:vars]['backend_service_name'] %>"
   region                          = "us-central1"
   health_checks                   = [google_compute_health_check.default.id]
   connection_draining_timeout_sec = 10
@@ -7,7 +7,7 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_health_check" "default" {
-  name               = "rbs-health-check"
+  name               = "<%= ctx[:vars]['health_check_name'] %>"
   check_interval_sec = 1
   timeout_sec        = 1
 
@@ -17,9 +17,9 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
-  name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
+  name = "projects/397988910753/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
-    identity_sources = ["IDENTITY_SOURCE_UPSPECIFIED"]
+    identity_sources = ["IDENTITY_SOURCE_UNSPECIFIED"]
     cors_settings {
       allow_http_options = true
     }
@@ -29,8 +29,8 @@ resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
       policy_type = "MINIMUM"
     }
     allowed_domains_settings {
-      domains = ["xyz.org","abc.in"]
-      enable = true
+      domains = ["xyz.org", "abc.in"]
+      enable  = true
     }
   }
   application_settings {
