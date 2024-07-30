@@ -1,3 +1,6 @@
+data "google_project" "project" {
+}
+
 resource "google_compute_region_backend_service" "default" {
   name                            = "<%= ctx[:vars]['backend_service_name'] %>"
   region                          = "us-central1"
@@ -17,30 +20,40 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
-  name = "projects/397988910753/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
+  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
     identity_sources = ["IDENTITY_SOURCE_UNSPECIFIED"]
     cors_settings {
       allow_http_options = true
     }
     reauth_settings {
-      method = "LOGIN"
-      max_age = "405s"
+      method = "SECURE_KEY"
+      max_age = "305s"
       policy_type = "MINIMUM"
     }
-    allowed_domains_settings {
-      domains = ["xyz.org", "abc.in"]
-      enable  = true
+    oauth_settings {
+      login_hint = "test"
     }
+    workforce_identity_settings {
+      workforce_pools = ["wif-pool"]
+      oauth2 {
+        client_id = "test-client-id"
+        client_secret = "test-client-secret"
+      }
+    }    
   }
   application_settings {
     csm_settings {
-      rctoken_aud = "audience"
-    } 
+      rctoken_aud = "test-aud-set"
+    }
     access_denied_page_settings {
-      access_denied_page_uri = "access-denied-uri"
+      access_denied_page_uri = "test-uri"
       generate_troubleshooting_uri = true
-      remediation_token_generation_enabled = true
-    }   
+      remediation_token_generation_enabled = false
+    }
+    attribute_propagation_settings {
+      output_credentials = ["HEADER"]
+      enable = false
+    }
   }
 }

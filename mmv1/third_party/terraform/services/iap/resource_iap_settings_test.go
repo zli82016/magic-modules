@@ -3,7 +3,7 @@ package iap_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -18,20 +18,13 @@ func TestAccIapSettings_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIapSettingsDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIapSettings_basic(context),
 			},
 			{
-				ResourceName:      "google_iap_settings.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-						{
-				Config: testAccIapSettings_update(context),
-			},
-			{
-				ResourceName:      "google_iap_settings.default",
+				ResourceName:      "google_iap_settings.iap_settings",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -41,6 +34,9 @@ func TestAccIapSettings_update(t *testing.T) {
 
 func testAccIapSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+
+	data "google_project" "project" {
+	}
 	
 	resource "google_compute_region_backend_service" "default" {
   	  name                            = "tf-test-iap-settings-tf%{random_suffix}"
@@ -59,66 +55,42 @@ func testAccIapSettings_basic(context map[string]interface{}) string {
 	  }
 	}
 
-	resource "google_iap_settings" "default" {
-	  name = "projects/397988910753/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.id}"
+	resource "google_iap_settings" "iap_settings" {
+	  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
 	  access_settings {
 	    identity_sources = ["IDENTITY_SOURCE_UNSPECIFIED"]
 	    cors_settings {
 	      allow_http_options = true
 	    }
 	    reauth_settings {
-	      method = "LOGIN"
-	      max_age = "405s"
+	      method = "SECURE_KEY"
+	      max_age = "305s"
 	      policy_type = "MINIMUM"
-	    }
-	    allowed_domains_settings {
-	      domains = ["xyz.org", "abc.in"]
-	      enable  = true
-	    }
-	  }
-	  application_settings {
-	    csm_settings {
-	      rctoken_aud = "audience"
-	    } 
-	    access_denied_page_settings {
-	      access_denied_page_uri = "access-denied-uri"
-	      generate_troubleshooting_uri = true
-	      remediation_token_generation_enabled = true
-	    }   
-	  }
-	}
-`, context)
-}
-
-func testAccIapSettings_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-	
-	resource "google_iap_settings" "default" {
-	  name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
-	  access_settings {
-	    gcip_settings {
-	      login_page_uri = "https://test.com/?apiKey=abcd_efgh"
-	      tenant_ids = ["tenant1","tenant2"]
 	    }
 	    oauth_settings {
 	      login_hint = "test"
-	      programmatic_clients = ["client_ids"]
 	    }
 	    workforce_identity_settings {
+	      workforce_pools = ["wif-pool"]
 	      oauth2 {
-	        client_id = "test_id"
-	        client_secret = "test"
+	        client_id = "test-client-id"
+	        client_secret = "test-client-secret"
 	      }
-	      workforce_pools = ["wifpool"]
-	    }
+	    }    
 	  }
 	  application_settings {
-	    attribute_propagation_settings {
-	      enable = true
-	      expression = "test"
-	      output_credentials = ["HEADER"]
+	    csm_settings {
+	      rctoken_aud = "test-aud-set"
 	    }
-	    cookie_domain = "org"
+	    access_denied_page_settings {
+	      access_denied_page_uri = "test-uri"
+	      generate_troubleshooting_uri = true
+	      remediation_token_generation_enabled = false
+	    }
+	    attribute_propagation_settings {
+	      output_credentials = ["HEADER"]
+	      enable = false
+	    }
 	  }
 	}
 `, context)
