@@ -27,6 +27,7 @@ skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
+    diff_suppress_func: 'NameDiffSuppress'
     description: |
       The resource name of the IAP protected resource.
     required: true
@@ -166,12 +167,14 @@ properties:
               - !ruby/object:Api::Type::String
                 name: 'clientSecret'
                 sensitive: true
+                ignore_read: true
                 description: |
                   Input only. The OAuth 2.0 client secret created while registering
                   the client ID.
               - !ruby/object:Api::Type::String
                 name: 'clientSecretSha256'
                 output: true
+                sensitive: true
                 description: |
                   Output only. SHA256 hash value for the client secret. This field
                   is returned by IAP when the settings are retrieved.
@@ -275,11 +278,12 @@ properties:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/clear_iap_settings.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  constants: 'templates/terraform/constants/iap_settings_name.go.erb'
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iap_settings_basic'
-    primary_resource_id: 'default'
+    primary_resource_id: 'iap_settings'
     vars:
       backend_service_name: iap-settings-tf
       health_check_name: iap-bs-health-check
