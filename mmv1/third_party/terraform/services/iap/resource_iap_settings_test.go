@@ -3,7 +3,7 @@ package iap_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -58,7 +58,6 @@ func testAccIapSettings_basic(context map[string]interface{}) string {
 	resource "google_iap_settings" "iap_settings" {
 	  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
 	  access_settings {
-	    identity_sources = ["IDENTITY_SOURCE_UNSPECIFIED"]
 	    cors_settings {
 	      allow_http_options = true
 	    }

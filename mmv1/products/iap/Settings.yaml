@@ -95,12 +95,10 @@ properties:
             description: |
               Reauth method requested. The possible values are:
 
-              * `METHOD_UNSPECIFIED`: Reauthentication disabled.
               * `LOGIN`: Prompts the user to log in again.
               * `SECURE_KEY`: User must use their secure key 2nd factor device.
               * `ENROLLED_SECOND_FACTORS`: User can use any enabled 2nd factor.
             values:
-              - :METHOD_UNSPECIFIED
               - :LOGIN
               - :SECURE_KEY
               - :ENROLLED_SECOND_FACTORS
@@ -115,7 +113,6 @@ properties:
             name: 'policyType'
             required: true
             values:
-              - :POLICY_TYPE_UNSPECIFIED
               - :MINIMUM
               - :DEFAULT
             description: |
@@ -123,7 +120,6 @@ properties:
               Policies are merged from higher in the hierarchy to lower in the hierarchy.
               The possible values are:
 
-              * `POLICY_TYPE_UNSPECIFIED`: Default value. This value is unused.
               * `MINIMUM`: This policy acts as a minimum to other policies, lower in the hierarchy.
               		   Effective policy may only be the same or stricter.
               * `DEFAULT`: This policy acts as a default if no other reauth policy is set.
@@ -184,11 +180,6 @@ properties:
           Identity sources that IAP can use to authenticate the end user. Only one identity source
           can be configured. The possible values are:
 
-          * `IDENTITY_SOURCE_UNSPECIFIED`: IdentitySource unspecified. When selected, IAP relies on
-            				   which identity settings are fully configured to redirect
-            				   the traffic to. The precedence order is
-            				   WorkforceIdentitySettings > GcipSettings/ If none is set,
-            				   default to use GOogle identity.
           * `WORKFORCE_IDENTITY_FEDERATION`: Use external identities set up on Google Cloud Workforce
             				     Identity Federation.
         item_type: !ruby/object:Api::Type::Enum
@@ -196,7 +187,6 @@ properties:
           description: |
             Identity sources Enum
           values:
-            - :IDENTITY_SOURCE_UNSPECIFIED
             - :WORKFORCE_IDENTITY_FEDERATION
   - !ruby/object:Api::Type::NestedObject
     name: 'applicationSettings'
@@ -248,7 +238,6 @@ properties:
               All attributes will be fully duplicated in each selected output credential.
               Possible values are:
 
-              * `OUTPUT_CREDENTIALS_UNSPECIFIED`: An output credential is required.
               * `HEADER`: Propagate attributes in the headers with "x-goog-iap-attr-" prefix.
               * `JWT`: Propagate attributes in the JWT of the form:
                        "additional_claims": { "my_attribute": ["value1", "value2"] }
@@ -259,7 +248,6 @@ properties:
               description: |
                 Output credentials attributes selected by the CEL expression
               values:
-                - :OUTPUT_CREDENTIALS_UNSPECIFIED
                 - :HEADER
                 - :JWT
                 - :RCTOKEN
