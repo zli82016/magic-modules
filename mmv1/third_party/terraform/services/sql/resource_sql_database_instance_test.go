@@ -2101,6 +2101,43 @@ func TestAccSqlDatabaseInstance_SqlServerTimezone(t *testing.T) {
 	})
 }
 
+func TestAccSqlServerTimezone_update(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
+	timezone := "Eastern Standard Time"
+	timezoneUpdate := "Pacific Standard Time"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerTimezone(instanceName, rootPassword, timezone),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerTimezone(instanceName, rootPassword, timezoneUpdate),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+
+		},
+	})
+}
+
+
 func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 	t.Parallel()
 
