@@ -3,7 +3,7 @@ package iap_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -58,6 +58,11 @@ func testAccIapSettings_basic(context map[string]interface{}) string {
 	resource "google_iap_settings" "iap_settings" {
 	  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
 	  access_settings {
+	    identity_sources = ["WORKFORCE_IDENTITY_FEDERATION"]
+	    allowed_domains_settings {
+	      domains = ["test.abc.com"]
+	      enable  = true
+	    }
 	    cors_settings {
 	      allow_http_options = true
 	    }
@@ -65,6 +70,9 @@ func testAccIapSettings_basic(context map[string]interface{}) string {
 	      method = "SECURE_KEY"
 	      max_age = "305s"
 	      policy_type = "MINIMUM"
+	    }
+	    gcip_settings {
+	      login_page_uri = "https://test.com/?apiKey=abc"
 	    }
 	    oauth_settings {
 	      login_hint = "test"
@@ -78,6 +86,7 @@ func testAccIapSettings_basic(context map[string]interface{}) string {
 	    }    
 	  }
 	  application_settings {
+	    cookie_domain = "test.abc.com"
 	    csm_settings {
 	      rctoken_aud = "test-aud-set"
 	    }
@@ -88,6 +97,7 @@ func testAccIapSettings_basic(context map[string]interface{}) string {
 	    }
 	    attribute_propagation_settings {
 	      output_credentials = ["HEADER"]
+	      expression = "attributes.saml_attributes.filter(attribute, attribute.name in [\"test1\", \"test2\"])"
 	      enable = false
 	    }
 	  }
