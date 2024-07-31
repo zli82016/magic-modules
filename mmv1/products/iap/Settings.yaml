@@ -20,7 +20,7 @@ self_link: '{{name}}:iapSettings'
 create_verb: :PATCH
 update_verb: :PATCH
 update_url: '{{name}}:iapSettings'
-import_format: ['{{name}}:iapSettings']
+import_format: ['{{name}}/iapSettings']
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 skip_sweeper: true
 
