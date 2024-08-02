@@ -27,6 +27,7 @@ func TestAccIapSettings_update(t *testing.T) {
 				ResourceName:      "google_iap_settings.iap_settings",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
 			},
 		},
 	})
