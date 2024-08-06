@@ -2132,11 +2132,9 @@ func TestAccSqlServerTimezone_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
 			},
-
 		},
 	})
 }
-
 
 func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 	t.Parallel()
