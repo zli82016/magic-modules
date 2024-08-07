@@ -28,6 +28,15 @@ func TestAccIapSettings_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
 			},
+			{
+				Config: testAccIapSettings_update(context),
+			},
+			{
+				ResourceName:            "google_iap_settings.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
+			},
 		},
 	})
 }
@@ -75,7 +84,6 @@ resource "google_iap_settings" "iap_settings" {
     }
     oauth_settings {
       login_hint = "test"
-      programmatic_clients = ["397988910753-8rlijr716l31npkpf2kvt03eiqnqj0ac.apps.googleusercontent.com"]
     }
     workforce_identity_settings {
       workforce_pools = ["wif-pool"]
@@ -97,6 +105,39 @@ resource "google_iap_settings" "iap_settings" {
     }
     attribute_propagation_settings {
       output_credentials = ["HEADER"]
+      expression = "attributes.saml_attributes.filter(attribute, attribute.name in [\"test1\", \"test2\"])"
+      enable = false
+    }
+  }
+}
+`, context)
+}
+
+func testAccIapSettings_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+resource "google_app_engine_application" "app" {
+  project     = data.google_project.project.project_id
+  location_id = "us-central"
+}
+
+resource "google_iap_settings" "default" {
+  name = "projects/${data.google_project.project.number}/iap_web/appengine-${google_app_engine_application.app.app_id}"
+  access_settings {
+    allowed_domains_settings {
+      domains = ["appengine.abc.com"]
+      enable  = true
+    }
+    cors_settings {
+      allow_http_options = true
+    }    
+  }
+  application_settings {
+    cookie_domain = "appengine.abc.com"
+    attribute_propagation_settings {
+      output_credentials = ["JWT"]
       expression = "attributes.saml_attributes.filter(attribute, attribute.name in [\"test1\", \"test2\"])"
       enable = false
     }
