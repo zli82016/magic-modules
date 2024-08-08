@@ -40,7 +40,6 @@ resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
     }
     oauth_settings {
       login_hint = "test"
-      programmatic_clients = ["397988910753-8rlijr716l31npkpf2kvt03eiqnqj0ac.apps.googleusercontent.com"]
     }
     workforce_identity_settings {
       workforce_pools = ["wif-pool"]
