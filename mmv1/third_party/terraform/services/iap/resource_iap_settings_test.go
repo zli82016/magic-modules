@@ -115,11 +115,13 @@ resource "google_iap_settings" "iap_settings" {
 
 func testAccIapSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
+resource "google_project" "my_project" {
+  name            = "test-project-id"
+  project_id      = "test-project-id"
 }
 
 resource "google_app_engine_application" "app" {
-  project     = data.google_project.project.project_id
+  project     = google_project.my_project.project_id
   location_id = "us-central"
 }
 
