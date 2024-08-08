@@ -126,7 +126,7 @@ resource "google_app_engine_application" "app" {
 }
 
 resource "google_iap_settings" "default" {
-  name = "projects/${data.google_project.project.number}/iap_web/appengine-${google_app_engine_application.app.app_id}"
+  name = "projects/${google_project.my_project.project_id}/iap_web/appengine-${google_app_engine_application.app.app_id}"
   access_settings {
     allowed_domains_settings {
       domains = ["appengine.abc.com"]
