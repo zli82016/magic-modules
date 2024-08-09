@@ -116,7 +116,7 @@ resource "google_iap_settings" "iap_settings" {
 func testAccIapSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "my_project" {
-  name            = "test-project-id"
+  name            = "tf-test-%{random_suffix}"
   project_id      = "test-project-id"
 }
 
