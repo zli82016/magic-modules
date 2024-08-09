@@ -19,7 +19,7 @@ func NameDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if !isServiceIdFormat(serviceName) && !isServiceIdFormat(serviceId) && serviceName == serviceId { 
 		return true
 	}
-	return true
+	return false
 }
 
 func isServiceIdFormat(s string) bool {
