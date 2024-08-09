@@ -117,7 +117,7 @@ func testAccIapSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "my_project" {
   name            = "tf-test-%{random_suffix}"
-  project_id      = "test-project-id"
+  project_id      = "tf-test-%{random_suffix}"
 }
 
 resource "google_app_engine_application" "app" {
