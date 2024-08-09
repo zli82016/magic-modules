@@ -130,7 +130,7 @@ resource "google_app_engine_application" "app" {
   location_id = "us-central"
 }
 
-resource "google_iap_settings" "default" {
+resource "google_iap_settings" "iap_settings" {
   name = "projects/${google_project.my_project.project_id}/iap_web/appengine-${google_app_engine_application.app.app_id}"
   access_settings {
     allowed_domains_settings {
