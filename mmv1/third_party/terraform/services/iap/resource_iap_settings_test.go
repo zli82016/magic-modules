@@ -5,13 +5,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccIapSettings_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -118,6 +121,8 @@ func testAccIapSettings_update(context map[string]interface{}) string {
 resource "google_project" "my_project" {
   name            = "tf-test-%{random_suffix}"
   project_id      = "tf-test-%{random_suffix}"
+  org_id = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "google_app_engine_application" "app" {
