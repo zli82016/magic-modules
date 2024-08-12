@@ -118,15 +118,15 @@ func testAccIapSettings_update(context map[string]interface{}) string {
 data "google_project" "project" {
 }
 
-resource "google_compute_region_backend_service" "default" {
+resource "google_compute_region_backend_service" "backend_service" {
   name                            = "tf-update-test-iap-settings-tf%{random_suffix}"
   region                          = "us-central1"
-  health_checks                   = [google_compute_health_check.default.id]
+  health_checks                   = [google_compute_health_check.health_check.id]
   connection_draining_timeout_sec = 10
   session_affinity                = "CLIENT_IP"
 }
 
-resource "google_compute_health_check" "default" {
+resource "google_compute_health_check" "health_check" {
   name               = "tf-update-test-iap-bs-health-check%{random_suffix}"
   check_interval_sec = 1
   timeout_sec        = 1
@@ -137,7 +137,7 @@ resource "google_compute_health_check" "default" {
 
 
 resource "google_iap_settings" "iap_settings" {
-  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
+  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.backend_service.name}"
   access_settings {
     allowed_domains_settings {
       domains = ["updated.abc.com"]
