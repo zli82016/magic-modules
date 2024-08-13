@@ -5,13 +5,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccIapSettings_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -115,36 +118,33 @@ resource "google_iap_settings" "iap_settings" {
 
 func testAccIapSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
+resource "google_project" "my_project" {
+  name            = "tf-test-%{random_suffix}"
+  project_id      = "tf-test-%{random_suffix}"
+  org_id = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
-resource "google_compute_region_backend_service" "backend_service" {
-  name                            = "tf-update-test-iap-settings-tf%{random_suffix}"
-  region                          = "us-central1"
-  health_checks                   = [google_compute_health_check.health_check.id]
-  connection_draining_timeout_sec = 10
-  session_affinity                = "CLIENT_IP"
+resource "google_app_engine_application" "app" {
+  project     = google_project.my_project.project_id
+  location_id = "us-central"
 }
 
-resource "google_compute_health_check" "health_check" {
-  name               = "tf-update-test-iap-bs-health-check%{random_suffix}"
-  check_interval_sec = 1
-  timeout_sec        = 1
-  tcp_health_check {
-    port = "80"
-  }
+resource "google_project_service" "project" {
+  project = google_project.my_project.project_id
+  service = "iap.googleapis.com"
 }
 
 
 resource "google_iap_settings" "iap_settings" {
-  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.backend_service.name}"
+  name = "projects/${google_project.my_project.project_id}/iap_web/appengine-${google_app_engine_application.app.app_id}"
   access_settings {
     allowed_domains_settings {
-      domains = ["updated.abc.com"]
-      enable  = false
+      domains = ["appengine.abc.com"]
+      enable  = true
     }
     cors_settings {
-      allow_http_options = false
+      allow_http_options = true
     }    
   }
   application_settings {
