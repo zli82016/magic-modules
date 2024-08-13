@@ -48,6 +48,7 @@ type FrameworkProviderConfig struct {
 	UniverseDomain             types.String
 	UserAgent                  string
 	UserProjectOverride        types.Bool
+	DefaultLabels              types.Map
 
 	// paths for client setup
 	<% products.each do |product| -%>
@@ -103,6 +104,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.Scopes = data.Scopes
 	p.Zone = data.Zone
 	p.UserProjectOverride = data.UserProjectOverride
+	p.DefaultLabels = data.DefaultLabels
 	p.PollInterval = 10 * time.Second
 	p.Project = data.Project
 	p.UniverseDomain = data.UniverseDomain
