@@ -15,6 +15,10 @@
 name: 'Settings'
 description: |
   gcloud iap settings - manage IAP settings
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Customizing IAP': 'https://cloud.google.com/iap/docs/customizing'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/IapSettings'
 base_url: '{{name}}:iapSettings'
 self_link: '{{name}}:iapSettings'
 create_verb: :PATCH
@@ -32,6 +36,7 @@ properties:
     description: |
       The resource name of the IAP protected resource.
     required: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'accessSettings'
     description: |
