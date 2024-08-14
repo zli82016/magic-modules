@@ -126,12 +126,6 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "time_sleep" "wait_60_seconds" {
-  depends_on = [google_project.my_project]
-
-  create_duration = "60s"
-}
-
 resource "google_app_engine_application" "app" {
   project     = google_project.my_project.project_id
   location_id = "us-central"
@@ -140,9 +134,6 @@ resource "google_app_engine_application" "app" {
 resource "google_project_service" "project" {
   project = google_project.my_project.project_id
   service = "iap.googleapis.com"
-  
-  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
-  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_iap_web_iam_member" "foo" {
