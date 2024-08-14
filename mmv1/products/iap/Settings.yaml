@@ -37,6 +37,7 @@ properties:
       The resource name of the IAP protected resource.
     required: true
     immutable: true
+    ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: 'accessSettings'
     description: |
