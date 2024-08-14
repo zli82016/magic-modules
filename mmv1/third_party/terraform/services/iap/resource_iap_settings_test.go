@@ -15,6 +15,7 @@ func TestAccIapSettings_update(t *testing.T) {
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
+		"role":            "roles/iap.httpsResourceAccessor",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -135,6 +136,11 @@ resource "google_project_service" "project" {
   service = "iap.googleapis.com"
 }
 
+resource "google_iap_web_iam_member" "foo" {
+  project = google_project_service.project.project
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+}
 
 resource "google_iap_settings" "iap_settings" {
   name = "projects/${google_project.my_project.project_id}/iap_web/appengine-${google_app_engine_application.app.app_id}"
