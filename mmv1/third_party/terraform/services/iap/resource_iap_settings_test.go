@@ -21,7 +21,10 @@ func TestAccIapSettings_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckIapSettingsDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckIapSettingsDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIapSettings_basic(context),
