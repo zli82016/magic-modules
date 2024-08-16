@@ -32,7 +32,6 @@ skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    diff_suppress_func: 'NameDiffSuppress'
     description: |
       The resource name of the IAP protected resource.
     required: true
@@ -272,7 +271,6 @@ properties:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: 'templates/terraform/custom_delete/clear_iap_settings.go.erb'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb'
-  constants: 'templates/terraform/constants/iap_settings_name.go.erb'
   custom_import: 'templates/terraform/custom_import/iap_settings.go.erb'
 
 examples:
