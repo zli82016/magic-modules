@@ -15,7 +15,7 @@ func TestAccIapSettings_update(t *testing.T) {
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
-		"role":            "roles/roles/iap.settingsAdmin",
+		"role":            "roles/iap.settingsAdmin",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -136,8 +136,9 @@ resource "google_project_service" "project" {
   service = "iap.googleapis.com"
 }
 
-resource "google_iap_web_iam_member" "foo" {
+resource "google_iap_web_type_app_engine_iam_member" "foo" {
   project = google_project_service.project.project
+  app_id = google_app_engine_application.app.app_id
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -161,6 +162,7 @@ resource "google_iap_settings" "iap_settings" {
       enable = false
     }
   }
+  depends_on = [google_iap_web_type_app_engine_iam_member.foo]
 }
 `, context)
 }
