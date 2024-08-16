@@ -15,7 +15,7 @@ func TestAccIapSettings_update(t *testing.T) {
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
-		"role":            "roles/iap.httpsResourceAccessor",
+		"role":            "roles/roles/iap.settingsAdmin",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
