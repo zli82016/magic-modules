@@ -14,12 +14,12 @@
 --- !ruby/object:Api::Resource
 name: 'FirewallPolicyAssociation'
 kind: 'compute#firewallPolicyAssociation'
-base_url: 'locations/global/firewallPolicies/{{firewall_policy}}'
-id_format: 'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
-self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
-create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation'
+base_url: '{{firewall_policy}}'
+id_format: '{{firewall_policy}}/associations/{{name}}'
+self_link: '{{firewall_policy}}/getAssociation?name={{name}}'
+create_url: '{{firewall_policy}}/addAssociation'
 delete_verb: :POST
-delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
+delete_url: '{{firewall_policy}}/removeAssociation?name={{name}}'
 import_format: [
   'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}',
   '{{firewall_policy}}/{{name}}'
@@ -38,6 +38,8 @@ custom_diff:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: 'templates/terraform/constants/compute_firewall_policy_association_operation.go.erb'
   post_delete: 'templates/terraform/constants/compute_firewall_policy_association_operation.go.erb'
+  custom_import: 'templates/terraform/constants/firewall_policy_association_import.go.erb'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firewall_policy_association'

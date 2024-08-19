@@ -10,7 +10,7 @@ resource "google_compute_firewall_policy" "policy" {
 }
 
 resource "google_compute_firewall_policy_association" "<%= ctx[:primary_resource_id] %>" {
-  firewall_policy = google_compute_firewall_policy.policy.name
+  firewall_policy = google_compute_firewall_policy.policy.id
   attachment_target = google_folder.folder.name
   name = "<%= ctx[:vars]['association_name'] %>"
 }

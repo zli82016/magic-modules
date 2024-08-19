@@ -10,7 +10,7 @@ resource "google_compute_firewall_policy" "policy" {
 }
 
 resource "google_compute_firewall_policy_association" "{{$.PrimaryResourceId}}" {
-  firewall_policy = google_compute_firewall_policy.policy.name
+  firewall_policy = google_compute_firewall_policy.policy.id
   attachment_target = google_folder.folder.name
   name = "{{index $.Vars "association_name"}}"
 }

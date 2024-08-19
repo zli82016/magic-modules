@@ -94,17 +94,20 @@ func testAccComputeFirewallPolicyAssociation_organization(context map[string]int
 resource "time_sleep" "wait_180s" {
   destroy_duration = "180s"
 }
+
 resource "google_folder" "folder" {
   display_name = "tf-test-my-folder-%{random_suffix}"
   parent       = "%{org_name}"
 }
+
 resource "google_compute_firewall_policy" "policy" {
   parent      = "%{org_name}"
   short_name  = "tf-test-my-policy-%{random_suffix}"
   description = "Example Resource"
 }
+
 resource "google_compute_firewall_policy_association" "default" {
-  firewall_policy = google_compute_firewall_policy.policy.name
+  firewall_policy = google_compute_firewall_policy.policy.id
   attachment_target = google_folder.folder.name
   name = "tf-test-my-association-%{random_suffix}"
   depends_on = [
