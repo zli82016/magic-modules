@@ -127,6 +127,7 @@ resource "google_project" "my_project" {
   project_id      = "tf-test-%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_protection = "DELETE"
 }
 
 resource "time_sleep" "wait_60_seconds" {
