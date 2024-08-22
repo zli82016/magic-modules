@@ -33,7 +33,18 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      The resource name of the IAP protected resource.
+      The resource name of the IAP protected resource. Name can have below resources:
+      * organizations/{organization_id}
+      * folders/{folder_id}
+      * projects/{projects_id}
+      * projects/{projects_id}/iap_web/compute
+      * projects/{projects_id}/iap_web/compute-{region}
+      * projects/{projects_id}/iap_web/compute/service/{service_id}
+      * projects/{projects_id}/iap_web/compute-{region}/service/{service_id}
+      * projects/{projects_id}/iap_web/appengine-{app_id}
+      * projects/{projects_id}/iap_web/appengine-{app_id}/service/{service_id}
+      * projects/{projects_id}/iap_web/appengine-{app_id}/service/{service_id}/version/{version_id}
+
     required: true
     immutable: true
     ignore_read: true

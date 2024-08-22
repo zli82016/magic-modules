@@ -10,23 +10,11 @@ if err != nil {
 
 headers := make(http.Header)
 
-res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	Config:    config,
-	Method:    "GET",
-	Project:   project,
-	RawURL:    url,
-	UserAgent: userAgent,
-	Headers:   headers,
-})
-if err != nil {
-	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("IapSettings %q", d.Id()))
-}
-
 obj := make(map[string]interface{})
 
 log.Printf("[DEBUG] Updating Settings %q: %#v", d.Id(), obj)
 
-res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
 	Method:    "PATCH",
 	Project:   project,
@@ -42,7 +30,5 @@ if err != nil {
 } else {
 	log.Printf("[DEBUG] Finished updating Settings %q: %#v", d.Id(), res)
 }
-
-time.Sleep(1 * time.Minute)
 
 return nil
