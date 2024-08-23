@@ -37,6 +37,7 @@ properties:
       * organizations/{organization_id}
       * folders/{folder_id}
       * projects/{projects_id}
+      * projects/{projects_id}/iap_web
       * projects/{projects_id}/iap_web/compute
       * projects/{projects_id}/iap_web/compute-{region}
       * projects/{projects_id}/iap_web/compute/service/{service_id}
