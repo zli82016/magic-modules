@@ -14,7 +14,8 @@
 package resource
 
 import (
-	"gopkg.in/yaml.v3"
+	"log"
+	"slices"
 )
 
 // Information about the IAM policy for this resource
@@ -60,7 +61,7 @@ type IamPolicy struct {
 	SetIamPolicyMethod string `yaml:"set_iam_policy_method"`
 
 	// Whether the policy JSON is contained inside of a 'policy' object.
-	WrappedPolicyObj bool `yaml:"wrapped_policy_obj"`
+	WrappedPolicyObj *bool `yaml:"wrapped_policy_obj"`
 
 	// Certain resources allow different sets of roles to be set with IAM policies
 	// This is a role that is acceptable for the given IAM policy resource for use in tests
@@ -114,32 +115,91 @@ type IamPolicy struct {
 
 	// [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
 	// Defaults to true
-	SubstituteZoneValue bool `yaml:"substitute_zone_value"`
+	SubstituteZoneValue *bool `yaml:"substitute_zone_value"`
 }
 
-func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
-	p.MethodNameSeparator = "/"
-	p.FetchIamPolicyVerb = "GET"
-	p.FetchIamPolicyMethod = "getIamPolicy"
-	p.SetIamPolicyVerb = "POST"
-	p.SetIamPolicyMethod = "setIamPolicy"
-	p.WrappedPolicyObj = true
-	p.AllowedIamRole = "roles/viewer"
-	p.ParentResourceAttribute = "id"
-	p.ExampleConfigBody = "templates/terraform/iam/go/iam_attributes.go.tmpl"
-	p.SubstituteZoneValue = true
+// func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
+// 	p.MethodNameSeparator = "/"
+// 	p.FetchIamPolicyVerb = "GET"
+// 	p.FetchIamPolicyMethod = "getIamPolicy"
+// 	p.SetIamPolicyVerb = "POST"
+// 	p.SetIamPolicyMethod = "setIamPolicy"
+// 	p.WrappedPolicyObj = true
+// 	p.AllowedIamRole = "roles/viewer"
+// 	p.ParentResourceAttribute = "id"
+// 	p.ExampleConfigBody = "templates/terraform/iam/go/iam_attributes.go.tmpl"
+// 	p.SubstituteZoneValue = true
 
-	type iamPolicyAlias IamPolicy
-	aliasObj := (*iamPolicyAlias)(p)
+// 	type iamPolicyAlias IamPolicy
+// 	aliasObj := (*iamPolicyAlias)(p)
 
-	err := n.Decode(&aliasObj)
-	if err != nil {
-		return err
-	}
+// 	err := n.Decode(&aliasObj)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // func (p *IamPolicy) validate() {
 
 // }
+
+func (p *IamPolicy) SetDefault() {
+	if p.MethodNameSeparator == "" {
+		p.MethodNameSeparator = "/"
+	}
+	if p.FetchIamPolicyVerb == "" {
+		p.FetchIamPolicyVerb = "GET"
+	}
+	if p.FetchIamPolicyMethod == "" {
+		p.FetchIamPolicyMethod = "getIamPolicy"
+	}
+	if p.SetIamPolicyVerb == "" {
+		p.SetIamPolicyVerb = "POST"
+	}
+	if p.SetIamPolicyMethod == "" {
+		p.SetIamPolicyMethod = "setIamPolicy"
+	}
+	if p.WrappedPolicyObj == nil {
+		p.WrappedPolicyObj = newTrue()
+	}
+	if p.AllowedIamRole == "" {
+		p.AllowedIamRole = "roles/viewer"
+	}
+	if p.ParentResourceAttribute == "" {
+		p.ParentResourceAttribute = "id"
+	}
+	if p.ExampleConfigBody == "" {
+		p.ExampleConfigBody = "templates/terraform/iam/go/iam_attributes.go.tmpl"
+	}
+	if p.SubstituteZoneValue == nil {
+		p.SubstituteZoneValue = newTrue()
+	}
+}
+
+func (p *IamPolicy) Validate(rName string) {
+	allowed := []string{"GET", "POST"}
+	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
+		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+	}
+
+	allowed = []string{"POST", "PUT"}
+	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
+		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+	}
+
+	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
+	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
+		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+	}
+}
+
+func (p *IamPolicy) IsWrappedPolicyObj() bool {
+	return *p.WrappedPolicyObj
+}
+
+func newTrue() *bool {
+	b := true
+	return &b
+}

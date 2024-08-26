@@ -261,7 +261,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
         json["version"] = {{ $.IamPolicy.IamPolicyVersion}}
 {{ end -}}
 
-{{ if and $.IamPolicy $.IamPolicy.WrappedPolicyObj -}}
+{{ if and $.IamPolicy $.IamPolicy.IsWrappedPolicyObj -}}
 	obj := make(map[string]interface{})
 	obj["policy"] = json
 {{- else }}

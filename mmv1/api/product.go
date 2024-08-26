@@ -16,8 +16,7 @@ package api
 import (
 	"log"
 	"strings"
-
-	"gopkg.in/yaml.v3"
+	"unicode"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -42,7 +41,6 @@ type Product struct {
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
-
 	Scopes []string
 
 	// The API versions of this product
@@ -61,31 +59,63 @@ type Product struct {
 
 	OperationRetry string `yaml:"operation_retry"`
 
-	Async *Async
+	Async interface{}
 
 	LegacyName string `yaml:"legacy_name"`
 
 	ClientName string `yaml:"client_name"`
 }
 
-func (p *Product) UnmarshalYAML(n *yaml.Node) error {
-	type productAlias Product
-	aliasObj := (*productAlias)(p)
+// func (p *Product) UnmarshalYAML(n *yaml.Node) error {
+// 	type productAlias Product
+// 	aliasObj := (*productAlias)(p)
 
-	err := n.Decode(&aliasObj)
-	if err != nil {
-		return err
-	}
+// 	err := n.Decode(&aliasObj)
+// 	if err != nil {
+// 		return err
+// 	}
 
+// 	p.SetApiName()
+// 	p.SetDisplayName()
+
+// 	return nil
+// }
+
+func (p *Product) SetDefault() {
+	// TODO Q2 Rewrite super
+	//     super
 	p.SetApiName()
 	p.SetDisplayName()
-
-	return nil
+	if p.Async != nil {
+		p.Async.SetDefault()
+	}
 }
 
 func (p *Product) Validate() {
 	// TODO Q2 Rewrite super
 	//     super
+
+	// product names must start with a capital
+	for i, ch := range p.Name {
+		if !unicode.IsUpper(ch) {
+			log.Fatalf("product name `%s` must start with a capital letter.", p.Name)
+		}
+		if i == 0 {
+			break
+		}
+	}
+
+	if len(p.Scopes) == 0 {
+		log.Fatalf("Missing `scopes` for product %s", p.Name)
+	}
+
+	if p.Versions == nil {
+		log.Fatalf("Missing `versions` for product %s", p.Name)
+	}
+
+	for _, v := range p.Versions {
+		v.Validate(p.Name)
+	}
 }
 
 // def validate

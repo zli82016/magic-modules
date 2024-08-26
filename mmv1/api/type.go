@@ -144,14 +144,32 @@ type Type struct {
 	// Adds a ValidateFunc to the item schema
 	ItemValidation resource.Validation `yaml:"item_validation"`
 
-	// __name
-	ParentName string
-
 	// ====================
 	// ResourceRef Fields
 	// ====================
 	Resource string
 	Imports  string
+
+	// ====================
+	// Map Fields
+	// ====================
+	// The type definition of the contents of the map.
+	ValueType *Type `yaml:"value_type"`
+
+	// While the API doesn't give keys an explicit name, we specify one
+	// because in Terraform the key has to be a property of the object.
+	//
+	// The name of the key. Used in the Terraform schema as a field name.
+	KeyName string `yaml:"key_name"`
+
+	// A description of the key's format. Used in Terraform to describe
+	// the field in documentation.
+	KeyDescription string `yaml:"key_description"`
+
+	// ====================
+	// KeyValuePairs Fields
+	// ====================
+	IgnoreWrite bool `yaml:"ignore_write"`
 
 	// ====================
 	// Terraform Overrides
@@ -203,27 +221,6 @@ type Type struct {
 
 	// For a TypeMap, the DSF to apply to the key.
 	KeyDiffSuppressFunc string `yaml:"key_diff_suppress_func"`
-
-	// ====================
-	// Map Fields
-	// ====================
-	// The type definition of the contents of the map.
-	ValueType *Type `yaml:"value_type"`
-
-	// While the API doesn't give keys an explicit name, we specify one
-	// because in Terraform the key has to be a property of the object.
-	//
-	// The name of the key. Used in the Terraform schema as a field name.
-	KeyName string `yaml:"key_name"`
-
-	// A description of the key's format. Used in Terraform to describe
-	// the field in documentation.
-	KeyDescription string `yaml:"key_description"`
-
-	// ====================
-	// KeyValuePairs Fields
-	// ====================
-	IgnoreWrite bool `yaml:"ignore_write"`
 
 	// ====================
 	// Schema Modifications
@@ -280,6 +277,9 @@ type Type struct {
 
 	ParentMetadata *Type // is nil for top-level properties
 
+	// __name
+	ParentName string
+
 	// The prefix used as part of the property expand/flatten function name
 	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
 	Prefix string
@@ -331,6 +331,28 @@ func (t *Type) SetDefault(r *Resource) {
 
 	if t.ApiName == "" {
 		t.ApiName = t.Name
+	}
+}
+
+func (t *Type) Validate(rName string) {
+	if t.Output && t.Required {
+		log.Fatalf("Property %s cannot be output and required at the same time in resource %s.", t.Name, rName)
+	}
+
+	if t.DefaultFromApi && t.DefaultValue != nil {
+		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
+	}
+
+	switch {
+	case t.IsA("Array"):
+		t.ItemType.Validate(rName)
+	case t.IsA("Map"):
+		t.ValueType.Validate(rName)
+	case t.IsA("NestedObject"):
+		for _, p := range t.Properties {
+			p.Validate(rName)
+		}
+	default:
 	}
 }
 

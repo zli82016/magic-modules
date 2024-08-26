@@ -165,6 +165,7 @@ func main() {
 			})
 
 			productApi.Objects = resources
+			productApi.SetDefault()
 			productApi.Validate()
 
 			// TODO Q2: set other providers via flag

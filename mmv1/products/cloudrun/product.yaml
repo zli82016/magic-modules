@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: CloudRun
 display_name: Cloud Run
+test: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

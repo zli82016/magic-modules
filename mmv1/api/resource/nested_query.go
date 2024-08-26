@@ -13,6 +13,8 @@
 
 package resource
 
+import "log"
+
 // Metadata for resources that are nested within a parent resource, as
 // a list of resources or single object within the parent.
 // e.g. Fine-grained resources
@@ -46,7 +48,13 @@ type NestedQuery struct {
 // def validate
 //   super
 
-//   check :keys, type: Array, item_type: String, required: true
-//   check :is_list_of_ids, type: :boolean, default: false
-//   check :modify_by_patch, type: :boolean, default: false
+//	check :keys, type: Array, item_type: String, required: true
+//	check :is_list_of_ids, type: :boolean, default: false
+//	check :modify_by_patch, type: :boolean, default: false
+//
 // end
+func (q *NestedQuery) Validate(rName string) {
+	if len(q.Keys) == 0 {
+		log.Fatalf("Missing `keys` for `nested_query` in resource %s", rName)
+	}
+}

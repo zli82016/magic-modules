@@ -21,6 +21,7 @@ versions:
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 async: !ruby/object:Api::OpAsync
+  message: 'message'
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'

@@ -14,6 +14,8 @@
 package google
 
 import (
+	"bytes"
+	"io"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -26,9 +28,21 @@ func (v *YamlValidator) Parse(content []byte, obj interface{}, yamlPath string) 
 	// TODO(nelsonjr): Allow specifying which symbols to restrict it further.
 	// But it requires inspecting all configuration files for symbol sources,
 	// such as Enum values. Leaving it as a nice-to-have for the future.
-	if err := yaml.Unmarshal(content, obj); err != nil {
+	if err := unmarshalStrict(content, obj); err != nil {
 		log.Fatalf("Cannot unmarshal data from file %s: %v", yamlPath, err)
 	}
+
+	// log.Printf("zhenhuatest obj %#v", obj)
+}
+
+func unmarshalStrict(data []byte, out interface{}) error {
+	dec := yaml.NewDecoder(bytes.NewReader(data))
+	dec.KnownFields(true)
+	if err := dec.Decode(out); err != nil && err != io.EOF {
+		log.Printf("zhenhuatest error")
+		return err
+	}
+	return nil
 }
 
 // func (v *YamlValidator) allowed_classes() {

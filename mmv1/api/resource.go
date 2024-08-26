@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"maps"
 	"regexp"
 	"sort"
@@ -23,7 +24,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 )
 
 type Resource struct {
@@ -193,7 +193,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []resource.Examples
+	Examples []*resource.Examples
 
 	// Virtual fields are Terraform-only fields that control Terraform's
 	// behaviour. They don't map to underlying API fields (although they
@@ -308,43 +308,130 @@ type Resource struct {
 	ImportPath string
 }
 
-func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
-	r.CreateVerb = "POST"
-	r.ReadVerb = "GET"
-	r.DeleteVerb = "DELETE"
-	r.UpdateVerb = "PUT"
+// func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
+// 	r.CreateVerb = "POST"
+// 	r.ReadVerb = "GET"
+// 	r.DeleteVerb = "DELETE"
+// 	r.UpdateVerb = "PUT"
 
-	type resourceAlias Resource
-	aliasObj := (*resourceAlias)(r)
+// 	type resourceAlias Resource
+// 	aliasObj := (*resourceAlias)(r)
 
-	err := n.Decode(&aliasObj)
-	if err != nil {
-		return err
+// 	err := n.Decode(&aliasObj)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if r.ApiName == "" {
+// 		r.ApiName = r.Name
+// 	}
+// 	if r.CollectionUrlKey == "" {
+// 		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+// 	}
+
+// 	return nil
+// }
+
+func (r *Resource) SetDefault(product *Product) {
+	if r.CreateVerb == "" {
+		r.CreateVerb = "POST"
 	}
-
+	if r.ReadVerb == "" {
+		r.ReadVerb = "GET"
+	}
+	if r.DeleteVerb == "" {
+		r.DeleteVerb = "DELETE"
+	}
+	if r.UpdateVerb == "" {
+		r.UpdateVerb = "PUT"
+	}
 	if r.ApiName == "" {
 		r.ApiName = r.Name
 	}
 	if r.CollectionUrlKey == "" {
 		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
 	}
-
-	return nil
-}
-
-// TODO: rewrite functions
-func (r *Resource) Validate() {
-	// TODO Q1 Rewrite super
-	// super
-}
-
-func (r *Resource) SetDefault(product *Product) {
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
 	if r.IdFormat == "" {
 		r.IdFormat = r.SelfLinkUri()
+	}
+	if r.IamPolicy != nil {
+		r.IamPolicy.SetDefault()
+	}
+	for _, example := range r.Examples {
+		example.SetDefault()
+	}
+
+	if r.Async != nil {
+		r.Async.SetDefault()
+	}
+}
+
+// TODO: rewrite functions
+func (r *Resource) Validate() {
+	// TODO Q1 Rewrite super
+	// super
+	if r.NestedQuery != nil && r.NestedQuery.IsListOfIds && len(r.Identity) != 1 {
+		log.Fatalf("`is_list_of_ids: true` implies resource has exactly one `identity` property")
+	}
+
+	// Ensures we have all properties defined
+	for _, i := range r.Identity {
+		hasIdentify := slices.ContainsFunc(r.AllUserProperties(), func(p *Type) bool {
+			return p.Name == i
+		})
+		if !hasIdentify {
+			log.Fatalf("Missing property/parameter for identity %s", i)
+		}
+	}
+
+	if r.Description == "" {
+		log.Fatalf("Missing `description` for resource %s", r.Name)
+	}
+
+	if !r.Exclude {
+		if len(r.Properties) == 0 {
+			log.Fatalf("Missing `properties` for resource %s", r.Name)
+		}
+	}
+
+	allowed := []string{"POST", "PUT", "PATCH"}
+	if !slices.Contains(allowed, r.CreateVerb) {
+		log.Fatalf("Value on `create_verb` should be one of %#v", allowed)
+	}
+
+	allowed = []string{"GET", "POST"}
+	if !slices.Contains(allowed, r.ReadVerb) {
+		log.Fatalf("Value on `read_verb` should be one of %#v", allowed)
+	}
+
+	allowed = []string{"POST", "PUT", "PATCH", "DELETE"}
+	if !slices.Contains(allowed, r.DeleteVerb) {
+		log.Fatalf("Value on `delete_verb` should be one of %#v", allowed)
+	}
+
+	allowed = []string{"POST", "PUT", "PATCH"}
+	if !slices.Contains(allowed, r.UpdateVerb) {
+		log.Fatalf("Value on `update_verb` should be one of %#v", allowed)
+	}
+
+	for _, property := range r.AllProperties() {
+		property.Validate(r.Name)
+	}
+
+	if r.IamPolicy != nil {
+		r.IamPolicy.Validate(r.Name)
+	}
+
+	if r.NestedQuery != nil {
+		r.NestedQuery.Validate(r.Name)
+	}
+
+	for _, example := range r.Examples {
+		example.Validate(r.Name)
 	}
 }
 
@@ -1260,11 +1347,11 @@ func (r Resource) IamAttributes() []string {
 
 // Since most resources define a "basic" config as their first example,
 // we can reuse that config to create a resource to test IAM resources with.
-func (r Resource) FirstTestExample() resource.Examples {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) FirstTestExample() *resource.Examples {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.SkipTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
@@ -1272,15 +1359,15 @@ func (r Resource) FirstTestExample() resource.Examples {
 }
 
 func (r Resource) ExamplePrimaryResourceId() string {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.SkipTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
 	if len(examples) == 0 {
-		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+		examples = google.Reject(r.Examples, func(e *resource.Examples) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 		})
 	}
@@ -1333,7 +1420,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 					importQualifiers = append(importQualifiers, `context["project_id"]`)
 				}
 			}
-		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
+		} else if param == "zone" && *r.IamPolicy.SubstituteZoneValue {
 			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
 		} else if param == "region" || param == "location" {
 			example := r.FirstTestExample()
@@ -1550,10 +1637,10 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
-func (r Resource) TestExamples() []resource.Examples {
-	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) TestExamples() []*resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.SkipTest
-	}), func(e resource.Examples) bool {
+	}), func(e *resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
 }

@@ -18,7 +18,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 )
 
 // Base class from which other Async classes can inherit.
@@ -233,16 +232,27 @@ type PollAsync struct {
 	TargetOccurrences int `yaml:"target_occurrences"`
 }
 
-func (a *Async) UnmarshalYAML(n *yaml.Node) error {
-	a.Actions = []string{"create", "delete", "update"}
-	type asyncAlias Async
-	aliasObj := (*asyncAlias)(a)
+// func (a *Async) UnmarshalYAML(n *yaml.Node) error {
+// 	a.Actions = []string{"create", "delete", "update"}
+// 	type asyncAlias Async
+// 	aliasObj := (*asyncAlias)(a)
 
-	err := n.Decode(&aliasObj)
-	if err != nil {
-		return err
+// 	err := n.Decode(&aliasObj)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
+// 		a.TargetOccurrences = 1
+// 	}
+
+// 	return nil
+// }
+
+func (a *Async) SetDefault() error {
+	if len(a.Actions) == 0 {
+		a.Actions = []string{"create", "delete", "update"}
 	}
-
 	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
 		a.TargetOccurrences = 1
 	}

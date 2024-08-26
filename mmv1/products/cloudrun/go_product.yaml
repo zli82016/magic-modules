@@ -14,7 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'CloudRun'
-display_name: 'Cloud Run'
+display_name: 'Cloud Run1'
 versions:
   - name: 'ga'
     base_url: 'https://{{location}}-run.googleapis.com/'
