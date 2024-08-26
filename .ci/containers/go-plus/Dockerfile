@@ -20,10 +20,6 @@ ENV GOCACHE=/go/cache
 COPY --from=builder /go/pkg/mod /go/pkg/mod
 COPY --from=builder /go/cache /go/cache
 
-# Set up Github SSH cloning.
-RUN ssh-keyscan github.com >> /known_hosts
-RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
-
 RUN apt-get update && \
     apt-get install -y git jq unzip parallel curl && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -33,7 +29,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_amd64.zip \
-    && unzip terraform_1.2.5_linux_amd64.zip \
-    && rm terraform_1.2.5_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip \
+    && unzip terraform_1.8.3_linux_amd64.zip \
+    && rm terraform_1.8.3_linux_amd64.zip \
     && mv ./terraform /bin/terraform
