@@ -142,3 +142,21 @@ properties:
               - 'VULNERABILITY_DISABLED'
               - 'VULNERABILITY_BASIC'
               - 'VULNERABILITY_ENTERPRISE'
+      - name: "complianceConfig"
+        api_name: "compliancePostureConfig"
+        description: Defines the config needed to enable/disable features for Compliance Posture.
+        properties:
+          - name: "mode"
+            description: Sets which mode to use for Security Posture features.
+            required: true
+            values:
+              - DISABLED
+              - ENABLED
+          - name: "complianceStandards"
+            description: List of enabled compliance standards.
+            default_from_api: true
+            item_type:
+              properties:
+                - name: 'standard'
+                  description: Name of the compliance standard.
+                  required: true
