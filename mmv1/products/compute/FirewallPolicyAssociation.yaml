@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'FirewallPolicyAssociation'
 kind: 'compute#firewallPolicyAssociation'
+min_version: 'beta'
 base_url: '{{firewall_policy}}'
 id_format: '{{firewall_policy}}/associations/{{name}}'
 self_link: '{{firewall_policy}}/getAssociation?name={{name}}'
