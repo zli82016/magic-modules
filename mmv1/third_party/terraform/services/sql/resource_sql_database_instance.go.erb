@@ -1975,7 +1975,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-        // Check if timezone is updated.
+        // Check if timezone is updated
         if d.HasChange("settings.0.time_zone") {
           timezone := d.Get("settings.0.time_zone").(string)
           instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{TimeZone: timezone}}
