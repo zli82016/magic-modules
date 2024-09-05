@@ -266,7 +266,8 @@ properties:
     name: 'databaseVersion'
     default_from_api: true
     description: |
-      The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
+      The database engine major version. This is an optional field and it's populated at the Cluster creation time. 
+      Note: Changing this field to a higer version results in upgrading the AlloyDB cluster which is an irreversible change.
   - !ruby/object:Api::Type::NestedObject
     name: 'pscConfig'
     description: 'Configuration for Private Service Connect (PSC) for the cluster.'
