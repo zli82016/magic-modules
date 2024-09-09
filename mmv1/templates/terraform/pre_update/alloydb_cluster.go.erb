@@ -6,7 +6,6 @@ if d.HasChange("database_version") && !tpgresource.IsEmptyValue(reflect.ValueOf(
     if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
         billingProject = bp
     }
-    upgradeUrl = strings.Replace(upgradeUrl, "/v1/", "/v1alpha/", 1)
 
     upgradeClusterTimeout := 72 * time.Hour
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
