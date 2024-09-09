@@ -7,7 +7,7 @@ if d.HasChange("database_version") && !tpgresource.IsEmptyValue(reflect.ValueOf(
         billingProject = bp
     }
 
-    upgradeClusterTimeout := 72 * time.Hour
+    upgradeClusterTimeout := 58 * time.Hour
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "PATCH",
