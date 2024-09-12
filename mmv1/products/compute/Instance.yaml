@@ -635,6 +635,10 @@ properties:
           - confidential_instance_config.0.confidential_instance_type
   - !ruby/object:Api::Type::Enum
     name: 'status'
+    # GCP API shows this as output: true.
+    # This is incorrect because you can make actions on the Instance (start, stop)
+    # In an idempotent world, the best way to express these actions is to
+    # change the status value.
     description: |
       The status of the instance. One of the following values:
       PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED,
@@ -642,11 +646,6 @@ properties:
 
       As a user, use RUNNING to keep a machine "on" and TERMINATED to
       turn a machine off
-    # GCP API shows this as output: true.
-    # This is incorrect because you can make actions on the Instance (start, stop)
-    # In an idempotent world, the best way to express these actions is to
-    # change the status value.
-    output: false
     values:
       - :PROVISIONING
       - :STAGING

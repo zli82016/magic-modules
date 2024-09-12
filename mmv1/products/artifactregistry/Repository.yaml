@@ -333,9 +333,9 @@ properties:
             - :KEEP
         - !ruby/object:Api::Type::NestedObject
           name: condition
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           description: |-
             Policy condition for matching versions.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - !ruby/object:Api::Type::Enum
               name: tagState
@@ -373,10 +373,10 @@ properties:
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
         - !ruby/object:Api::Type::NestedObject
           name: mostRecentVersions
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - !ruby/object:Api::Type::Array
               name: packageNamePrefixes

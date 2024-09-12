@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource # API resource name
+--- !ruby/object:Api::Resource # API resource name
 name: "kmsconfig"
 description: |
   NetApp Volumes always encrypts your data at rest using volume-specific keys.
