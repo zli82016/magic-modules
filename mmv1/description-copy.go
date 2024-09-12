@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -12,27 +11,29 @@ import (
 )
 
 func CopyAllDescriptions() {
-	identifiers := []string{
-		"description:",
-		"note:",
-		"set_hash_func:",
-		"warning:",
-		"required_properties:",
-		"optional_properties:",
-		"attributes:",
-	}
+	// identifiers := []string{
+	// 	"description:",
+	// 	"note:",
+	// 	"set_hash_func:",
+	// 	"warning:",
+	// 	"required_properties:",
+	// 	"optional_properties:",
+	// 	"attributes:",
+	// }
 
-	for i, id := range identifiers {
-		CopyText(id, len(identifiers)-1 == i)
-	}
+	// for i, id := range identifiers {
+	// 	CopyText(id, len(identifiers)-1 == i)
+	// }
 
-	// copyComments()
+	copyComments()
 }
 
-// Used to copy/paste text from Ruby -> Go YAML files
+// Used to copy/paste comments from Ruby -> Go YAML files
 func copyComments() {
 	renamedFields := map[string]string{
 		"skip_sweeper": "exclude_sweeper",
+		"skip_delete":  "exclude_delete",
+		"values":       "enum_values",
 	}
 	var allProductFiles []string = make([]string, 0)
 	files, err := filepath.Glob("products/**/go_product.yaml")
@@ -45,9 +46,6 @@ func copyComments() {
 	}
 
 	for _, productPath := range allProductFiles {
-		if !strings.Contains(productPath, "accesscontextmanager") {
-			continue
-		}
 		// Gather go and ruby file pairs
 		yamlMap := make(map[string][]string)
 		yamlPaths, err := filepath.Glob(fmt.Sprintf("%s/*", productPath))
@@ -71,29 +69,30 @@ func copyComments() {
 		}
 
 		for _, files := range yamlMap {
-			// log.Printf("files %#v", files)
 			rubyPath := files[0]
-			// rubyPath := "products/accesscontextmanager/AccessLevel.yaml"
-			// goPath := "products/accesscontextmanager/go_AccessLevel.yaml"
 			goPath := files[1]
+			// TODO rewrite: ServicePerimeters.yaml is an exeption and needs manually copy the comments over after switchover
+			if strings.Contains(rubyPath, "products/accesscontextmanager/ServicePerimeters.yaml") {
+				continue
+			}
 
-			// if !strings.Contains(rubyPath, "products/accesscontextmanager/AccessLevel.yaml") {
-			// 	continue
-			// }
+			if !strings.Contains(rubyPath, "bigqueryconnection/Connection.yaml") {
+				continue
+			}
 
 			recordingComments := false
 			comments := ""
 			commentsMap := make(map[string]string, 0)
-			commentsAreTerminated := false
 			nestedNameLine := ""
-
-			// if strings.Contains(rubyPath, "product.yaml") {
-			// 	// log.Printf("skipping %s", rubyPath)
-			// 	continue
-			// }
+			nestedParentLine := ""
+			trimmedPreviousLine := ""
 
 			// Ready Ruby yaml
-			r, err := regexp.Compile(`^\s*#.*?`)
+			wholeLineComment, err := regexp.Compile(`^\s*#.*?`)
+			if err != nil {
+				log.Fatalf("Cannot compile the regular expression: %v", err)
+			}
+
 			if err != nil {
 				log.Fatalf("Cannot compile the regular expression: %v", err)
 			}
@@ -103,9 +102,10 @@ func copyComments() {
 			scanner := bufio.NewScanner(file)
 			for scanner.Scan() {
 				line := scanner.Text()
-
-				if r.MatchString(line) {
-					// log.Printf("line %s", line)
+				if line == "" {
+					continue
+				}
+				if wholeLineComment.MatchString(line) {
 					if !recordingComments {
 						recordingComments = true
 						comments = line
@@ -113,41 +113,70 @@ func copyComments() {
 						comments = fmt.Sprintf("%s\n%s", comments, line)
 					}
 				} else {
-					// Replace ' with whitespace
-					normalizedLine := strings.ReplaceAll(line, "'", "")
+					normalizedLine := line
+
+					indexOfComment := strings.Index(normalizedLine, " # ")
+					if indexOfComment > 0 { // The comments are in the same line with the code
+						comments = normalizedLine[indexOfComment:]
+						recordingComments = true
+						normalizedLine = strings.TrimRight(normalizedLine[:indexOfComment], " ")
+					}
+
+					normalizedLine = strings.ReplaceAll(normalizedLine, "'", "")
+					normalizedLine = strings.ReplaceAll(normalizedLine, `"`, "")
+					normalizedLine = strings.ReplaceAll(normalizedLine, `\`, "")
+					normalizedLine = strings.ReplaceAll(normalizedLine, ": :", ": ")
+					normalizedLine = strings.ReplaceAll(normalizedLine, "- :", "- ")
 					trimmed := strings.TrimSpace(normalizedLine)
 					index := strings.Index(normalizedLine, trimmed)
 
 					if index == 0 {
+						nestedParentLine = ""
 						nestedNameLine = ""
-					} else if index >= 2 && strings.HasPrefix(trimmed, "name:") {
-						nestedNameLine = fmt.Sprintf("%s- %s", normalizedLine[:index-2], normalizedLine[index:])
-						nestedNameLine = strings.ReplaceAll(nestedNameLine, "'", "")
+					} else if index >= 2 && (strings.HasPrefix(trimmedPreviousLine, "- !ruby/object") || strings.HasPrefix(trimmedPreviousLine, "--- !ruby/object")) {
+						normalizedLine = fmt.Sprintf("%s- %s", normalizedLine[:index-2], normalizedLine[index:])
+
+						if strings.HasPrefix(trimmed, "name:") {
+							if nestedNameLine != "" {
+								nestedParentLine = nestedNameLine
+							}
+							nestedNameLine = normalizedLine
+						}
 					}
+
+					trimmedPreviousLine = trimmed
 
 					if recordingComments {
 						if !strings.HasPrefix(comments, "# Copyright") {
-							// The line is a type, for example - !ruby/object:Api::Type::Array
-							if strings.Contains(normalizedLine, "!ruby/object") {
-								commentsAreTerminated = true
+							// The line is a type, for example - !ruby/object:Api::Type::Array.
+							// The lines of types are not present in Go yaml files
+							if strings.HasPrefix(trimmed, "- !ruby/object") || strings.HasPrefix(trimmed, "--- !ruby/object") {
 								continue
 							}
 
-							if commentsAreTerminated {
-								log.Printf("line will be trimmed %s", normalizedLine)
-								if index >= 2 {
-									normalizedLine = fmt.Sprintf("%s- %s", normalizedLine[:index-2], normalizedLine[index:])
-								}
-								commentsAreTerminated = false
+							// Remove suffix " !ruby/object" as the types are not present in Go yaml files
+							indexOfRuby := strings.Index(normalizedLine, ": !ruby/object")
+							if indexOfRuby >= 0 {
+								normalizedLine = normalizedLine[:indexOfRuby+1]
+							}
+							// Remove suffix Api::Type::
+							indexOfRuby = strings.Index(normalizedLine, " Api::Type::")
+							if indexOfRuby >= 0 {
+								normalizedLine = normalizedLine[:indexOfRuby]
 							}
 
 							// Some fields are renamed during yaml file conversion
 							field := strings.Split(normalizedLine, ":")[0]
+							if shouldUseFieldName(normalizedLine) {
+								normalizedLine = field
+							}
+
+							field = strings.TrimSpace(field)
 							if goName, ok := renamedFields[field]; ok {
 								normalizedLine = strings.Replace(normalizedLine, field, goName, 1)
 							}
 
-							key := fmt.Sprintf("%s$%s", nestedNameLine, normalizedLine)
+							key := fmt.Sprintf("%s$%s$%s", nestedParentLine, nestedNameLine, normalizedLine)
 							commentsMap[key] = comments
 						}
 						recordingComments = false
@@ -156,13 +185,13 @@ func copyComments() {
 				}
 			}
 
-			if len(commentsMap) > 0 {
-				j, _ := json.Marshal(commentsMap)
-				log.Printf("test rubyPath %s commentsmap %#v", rubyPath, string(j))
+			if len(commentsMap) == 0 {
+				continue
 			}
 
 			// Read Go yaml while writing to a temp file
 			nestedNameLine = ""
+			nestedParentLine = ""
 			newFilePath := fmt.Sprintf("%s_new", goPath)
 			fo, _ := os.Create(newFilePath)
 			w := bufio.NewWriter(fo)
@@ -171,34 +200,37 @@ func copyComments() {
 			scanner = bufio.NewScanner(file)
 			for scanner.Scan() {
 				line := scanner.Text()
-				// log.Printf("line1 %s", line)
-
-				if !r.MatchString(line) { // This line is not a comment
-					// log.Printf("line2 %s", line)
-
-					// log.Printf("line3 %s", line)
-
-					// log.Printf("line %s", line)
-
+				if line == "" {
+					continue
+				}
+				if !wholeLineComment.MatchString(line) { // This line is not a comment
 					// Replace ' with whitespace
 					normalizedLine := strings.ReplaceAll(line, "'", "")
+					normalizedLine = strings.ReplaceAll(normalizedLine, `"`, "")
 					trimmed := strings.TrimSpace(normalizedLine)
-					if strings.HasPrefix(trimmed, "- name:") {
+					index := strings.Index(normalizedLine, trimmed)
+
+					if index == 0 {
+						nestedParentLine = ""
+						nestedNameLine = ""
+					} else if index >= 2 && strings.HasPrefix(trimmed, "- name:") {
+						if nestedNameLine != "" {
+							nestedParentLine = nestedNameLine
+						}
 						nestedNameLine = normalizedLine
 					}
-					key := fmt.Sprintf("%s$%s", nestedNameLine, normalizedLine)
 
-					// if strings.Contains(normalizedLine, "- name: parent") {
-					// 	log.Printf("line comments nestedNameLine %s: %d", nestedNameLine, len(nestedNameLine))
-					// 	log.Printf("line comments normalizedLine %s: %d", normalizedLine, len(normalizedLine))
-					// }
+					field := strings.Split(normalizedLine, ":")[0]
+					if shouldUseFieldName(normalizedLine) {
+						normalizedLine = field
+					}
+
+					key := fmt.Sprintf("%s$%s$%s", nestedParentLine, nestedNameLine, normalizedLine)
 					if comments, ok := commentsMap[key]; ok {
-						log.Printf("line has comments normalizedLine %s", normalizedLine)
 						delete(commentsMap, key)
 						line = fmt.Sprintf("%s\n%s", comments, line)
 					}
 				}
-				// log.Printf("line4 %s", line)
 				_, err := w.WriteString(fmt.Sprintf("%s\n", line))
 				if err != nil {
 					log.Fatalf("Error when writing the line %s: %#v", line, err)
@@ -209,26 +241,28 @@ func copyComments() {
 			if err = w.Flush(); err != nil {
 				panic(err)
 			}
+
 			if len(commentsMap) > 0 {
-				for key := range commentsMap {
-					arr := strings.Split(key, "$")
-					log.Printf("left comments name  %s: %d", arr[0], len(arr[0]))
-					log.Printf("left comments line  %s: %d", arr[1], len(arr[1]))
-				}
-
-				j, _ := json.Marshal(commentsMap)
-				log.Printf("some comments left: test rubyPath %s commentsmap %#v", rubyPath, string(j))
-
-				// os.Remove(newFilePath)
-
-			} else {
-				// Overwrite original file with temp
-				os.Rename(newFilePath, goPath)
+				log.Printf("Some comments in rubyPath %s are not copied over: %#v", rubyPath, commentsMap)
 			}
+			// Overwrite original file with temp
+			os.Rename(newFilePath, goPath)
 		}
 
 	}
 
+}
+
+// custom template files in Go yaml files have different names
+// The format of primary_resource_name for enum is different in Go yaml files
+func shouldUseFieldName(line string) bool {
+	filedNames := []string{"templates/terraform/", "primary_resource_name:", "default_value:", "deprecation_message:"}
+	for _, fieldName := range filedNames {
+		if strings.Contains(line, fieldName) {
+			return true
+		}
+	}
+	return false
 }
 
 // Used to copy/paste text from Ruby -> Go YAML files
