@@ -20,11 +20,8 @@ description: 'BranchRule is the protection rule to enforce pre-defined rules on 
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/overview'
-# create_url: '{{repository}}}/branchRules?branch_rule_id={{branch_rule_id}}'
 id_format: '{{repository}}/branchRules/{{branch_rule_id}}'
 import_format: ['projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}', '{{branch_rule_id}}']
-# update_verb: :PATCH
-# update_mask: true
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
@@ -50,6 +47,18 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_branch_rule_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      branch_rule_id: 'my-branchrule'
+      repository_id: 'my-repository'
+      prevent_desrtroy: 'true'
+    test_vars_overrides:
+      prevent_destory: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_branch_rule_with_fields'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
       context[\"random_suffix\"\
@@ -109,15 +118,6 @@ properties:
     name: 'includePattern'
     description: |
       The pattern of the branch that can match to this BranchRule. Specified as regex. Use .* for all branches.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'requiredStatusChecks'
-    description: |
-      List of required status checks before merging to the branch.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'context'
-        description: |
-          The context of the check.
   - !ruby/object:Api::Type::Boolean
     name: 'disabled'
     description: |

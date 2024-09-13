@@ -14,4 +14,10 @@ resource "google_secure_source_manager_branch_rule" "default" {
     repository_id = google_secure_source_manager_repository.repository.repository_id
     branch_rule_id = "<%= ctx[:vars]['branch_rule_id'] %>"
     location = "us-central1"
+    include_pattern = "test"
+    minimum_approvals_count   = 2
+    minimum_reviews_count     = 2
+    require_comments_resolved = true
+    require_linear_history    = true
+    require_pull_request      = true
 }
