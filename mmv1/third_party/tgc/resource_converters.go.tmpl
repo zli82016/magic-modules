@@ -30,8 +30,12 @@ package google
 import (
 	"sort"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/kms"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/resourcemanager"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/spanner"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/secretmanagerregional"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/securesourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/securitycenterv2"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
@@ -144,14 +148,11 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_monitoring_notification_channel":          {monitoring.ResourceConverterMonitoringNotificationChannel()},
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
 		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},		
-	{{- range $object := $.ResourcesForVersion }}
-	{{- if $object.ResourceName }}
-		"{{ $object.TerraformName }}": {{ $object.ResourceName }}(),
-	{{- end }}
+	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
-		"{{ $object.TerraformName }}_iam_binding":              tpgiamresource.ResourceIamBinding({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_member":               tpgiamresource.ResourceIamMember({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.ResourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
+		"{{ $object.TerraformName }}_iam_policy": { {{- $object.IamClassName }}IamPolicy()},
+		"{{ $object.TerraformName }}_iam_binding": { {{- $object.IamClassName }}IamBinding()},
+		"{{ $object.TerraformName }}_iam_member": { {{- $object.IamClassName }}IamMember()},
 	{{- end }}
 	{{- end }}
 		"google_project": {
