@@ -42,6 +42,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_branch_rule_basic'
+    primary_resource_id: "basic"
     vars:
       branch_rule_id: 'my-basic-branchrule'
       repository_id: 'my-basic-repository'
@@ -53,6 +54,7 @@ examples:
       prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_branch_rule_with_fields'
+    primary_resource_id: "default"
     vars:
       branch_rule_id: 'my-initial-branchrule'
       repository_id: 'my-initial-repository'
@@ -102,10 +104,6 @@ properties:
     description: |
       Time the BranchRule was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'etag'
-    description: |
-      This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
   - !ruby/object:Api::Type::String
     name: 'includePattern'
     required: true
