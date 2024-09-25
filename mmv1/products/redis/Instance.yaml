@@ -34,6 +34,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/redis_instance.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
   constants: templates/terraform/constants/redis_instance.go.erb
+  pre_delete: 'templates/terraform/pre_delete/redis_instance.go.erb'
 custom_diff: [
   'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)',
   'tpgresource.DefaultProviderProject',
@@ -41,7 +42,7 @@ custom_diff: [
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'deletion_protection'
-    default_value: false
+    default_value: true
     description: |
       Whether Terraform will be prevented from destroying the instance. Defaults to true.
       When a`terraform destroy` or `terraform apply` would delete the instance,
@@ -60,6 +61,8 @@ examples:
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_full'
     primary_resource_id: 'cache'

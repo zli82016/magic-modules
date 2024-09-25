@@ -359,7 +359,7 @@ resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "pre-update"
   memory_size_gb = 1
-  deletion_protection = false
+  deletion_protection = true
   
   region         = "us-central1"
 	%s
@@ -390,7 +390,7 @@ func testAccRedisInstance_update2(name string, preventDestroy bool) string {
 resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "post-update"
-  deletion_protection = false
+  deletion_protection = true
   memory_size_gb = 1
 	%s
 
@@ -422,7 +422,7 @@ resource "google_redis_instance" "test" {
   region       = "%s"
   display_name   = "pre-update"
   memory_size_gb = 1
-  deletion_protection = false
+  deletion_protection = true
 	%s
 
   labels = {
@@ -451,7 +451,7 @@ func testAccRedisInstance_deletionprotection2(name string, region string, preven
 resource "google_redis_instance" "test" {
   name           = "%s"
   region       = "%s"
-  deletion_protection = false
+  deletion_protection = true
   display_name   = "post-update"
   memory_size_gb = 1
 	%s
@@ -505,7 +505,7 @@ func testAccRedisInstance_selfServiceUpdate20240411_00_00(context map[string]int
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
   memory_size_gb = 1
-  deletion_protection = false
+  deletion_protection = true
   maintenance_version = "20240411_00_00"
 }
 `, context)
@@ -516,7 +516,7 @@ func testAccRedisInstance_selfServiceUpdate20240503_00_00(context map[string]int
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
   memory_size_gb = 1
-  deletion_protection = false
+  deletion_protection = true
   maintenance_version = "20240503_00_00"
 }
 `, context)
