@@ -23,6 +23,18 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
+// DecodeJSON decodes the map object into the target struct.
+func DecodeJSON(data map[string]interface{}, v interface{}) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	return nil
+}
+
 // MapToCtyValWithSchema normalizes and converts resource from untyped map format to TF JSON.
 //
 // Normalization is a post-processing of the output map, which does the following:
