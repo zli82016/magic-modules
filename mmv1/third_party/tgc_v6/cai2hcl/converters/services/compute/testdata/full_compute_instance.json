@@ -19,25 +19,45 @@
         "description": "test-description",
         "disks": [
           {
-            "autoDelete": true,
-            "boot": true,
             "deviceName": "test-device_name",
+            "boot": true,
+            "type": "PERSISTENT",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              }
+            ],
+            "diskSizeGb": "42",
             "diskEncryptionKey": {
-              "rawKey": "test-disk_encryption_key_raw"
+              "kmsKeyServiceAccount": "",
+              "kmsKeyName": "projects/test-project/locations/global/keyRings/tftest-shared-keyring-1/cryptoKeys/test-kms_key_self_link/cryptoKeyVersions/1"
             },
+            "index": 0,
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/disks/test-source",
+            "licenses": [
+              "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-11-bullseye"
+            ],
+            "autoDelete": true,
+            "interface": "SCSI",
+            "architecture": "X86_64",
             "initializeParams": {
-              "diskSizeGb": "42",
               "diskType": "projects/test-project/zones/us-central1-a/diskTypes/pd-standard",
               "sourceImage": "projects/debian-cloud/global/images/debian-9"
-            },
-            "mode": "READ_WRITE",
-            "source": "projects/test-project/zones/us-central1-a/disks/test-source"
+            }
           },
           {
             "autoDelete": true,
             "initializeParams": {
               "diskType": "projects/test-project/zones/us-central1-a/diskTypes/local-ssd"
             },
+            "index": 1,
             "interface": "SCSI",
             "type": "SCRATCH"
           },
@@ -46,30 +66,45 @@
             "initializeParams": {
               "diskType": "projects/test-project/zones/us-central1-a/diskTypes/local-ssd"
             },
+            "index": 2,
             "interface": "SCSI",
             "type": "SCRATCH"
           },
           {
-            "deviceName": "test-device_name",
-            "diskEncryptionKey": {
-              "kmsKeyName": "test-kms_key_self_link"
-            },
+            "autoDelete": false,
+            "interface": "SCSI",
+            "boot": false,
+            "deviceName": "test-device_name-1",
+            "source": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/disks/test-source",
             "mode": "READ_ONLY",
-            "source": "projects/test-project/zones/us-central1-a/disks/test-source"
+            "diskEncryptionKey": {
+              "kmsKeyServiceAccount": "",
+              "kmsKeyName": "projects/test-project/locations/global/keyRings/tftest-shared-keyring-1/cryptoKeys/test-kms_key_self_link-1/cryptoKeyVersions/1"
+            },
+            "type": "PERSISTENT",
+            "index": 3,
+            "diskSizeGb": "10"
           },
           {
+            "autoDelete": false,
+            "interface": "SCSI",
+            "boot": false,
+            "deviceName": "test-device_name-2",
+            "source": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/disks/test-source2",
             "mode": "READ_WRITE",
-            "source": "projects/test-project/zones/us-central1-a/disks/test-source2"
+            "type": "PERSISTENT",
+            "index": 4,
+            "diskSizeGb": "10"
           }
         ],
         "guestAccelerators": [
           {
-            "acceleratorCount": 42,
-            "acceleratorType": "projects/test-project/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type1"
+            "acceleratorCount": 40,
+            "acceleratorType": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type1"
           },
           {
             "acceleratorCount": 42,
-            "acceleratorType": "projects/test-project/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type2"
+            "acceleratorType": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type2"
           }
         ],
         "hostname": "test-hostname",
@@ -87,6 +122,9 @@
         },
         "minCpuPlatform": "test-min_cpu_platform",
         "name": "test1",
+        "displayDevice": {
+          "enableDisplay": true
+        },
         "networkInterfaces": [
           {
             "accessConfigs": [
@@ -110,8 +148,10 @@
                 "subnetworkRangeName": "test-subnetwork_range_name"
               }
             ],
+            "queueCount": 2,
             "network": "projects/test-project/global/networks/default",
-            "networkIP": "test-network_ip"
+            "networkIP": "test-network_ip",
+            "networkAttachment": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/networkAttachments/tf-test-basic-network-attachment"
           },
           {
             "subnetwork": "projects/test-subnetwork_project/regions/us-central1/subnetworks/test-subnetwork"
@@ -128,7 +168,8 @@
         ],
         "scheduling": {
           "automaticRestart": true,
-          "onHostMaintenance": "test-on_host_maintenance",
+          "onHostMaintenance": "MIGRATE",
+          "minNodeCpus": 4,
           "preemptible": true
         },
         "serviceAccounts": [
@@ -146,43 +187,6 @@
           ]
         },
         "zone": "projects/test-project/zones/us-central1-a"
-      }
-    }
-  },
-  {
-    "name": "//compute.googleapis.com/projects/test-project/zones/us-central1-a/instances/test2",
-    "asset_type": "compute.googleapis.com/Instance",
-    "ancestry_path": "organizations/123/folders/456/project/test-project",
-    "resource": {
-      "version": "v1",
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-      "discovery_name": "Instance",
-      "parent": "//cloudresourcemanager.googleapis.com/projects/test-project",
-      "data": {
-        "canIpForward": false,
-        "deletionProtection": false,
-        "disks": [
-          {
-            "autoDelete": true,
-            "boot": true,
-            "diskEncryptionKey": {
-              "kmsKeyName": "test-kms_key_self_link"
-            },
-            "mode": "READ_WRITE"
-          }
-        ],
-        "machineType": "projects/test-project/zones/us-central1-a/machineTypes/n1-standard-1",
-        "metadata": {},
-        "name": "test2",
-        "networkInterfaces": [
-          {
-            "network": "projects/test-project/global/networks/default"
-          }
-        ],
-        "scheduling": {
-          "automaticRestart": true
-        },
-        "tags": {}
       }
     }
   }
