@@ -59,7 +59,7 @@ func (c *ProjectConverter) convertResourceData(asset *caiasset.Asset) (*hcl.HCLR
 	hclData := make(map[string]interface{})
 	hclData["name"] = assetResourceData["name"]
 	hclData["project_id"] = assetResourceData["projectId"]
-	hclData["labels"] = assetResourceData["labels"]
+	hclData["labels"] = resource.FilterTerraformAttributionLabel(assetResourceData["labels"])
 	if strings.Contains(asset.Resource.Parent, "folders/") {
 		hclData["folder_id"] = resource.ParseFieldValue(asset.Resource.Parent, "folders")
 	} else if strings.Contains(asset.Resource.Parent, "organizations/") {

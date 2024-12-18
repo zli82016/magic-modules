@@ -11,6 +11,6 @@ func TestComputeInstance(t *testing.T) {
 		t,
 		"./testdata",
 		[]string{
-			"project_create",
+			"TestAccProject_create",
 		})
 }
