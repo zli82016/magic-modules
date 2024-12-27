@@ -1,0 +1,143 @@
+[
+    {
+      "name": "//compute.googleapis.com/projects/terraform-dev-zhenhuali/zones/us-central1-a/instances/test1",
+      "assetType": "compute.googleapis.com/Instance",
+      "resource": {
+        "version": "v1",
+        "discoveryDocumentUri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+        "discoveryName": "Instance",
+        "parent": "//cloudresourcemanager.googleapis.com/projects/316788426028",
+        "data": {
+          "advancedMachineFeatures": {
+            "enableNestedVirtualization": true
+          },
+          "description": "test-description",
+          "creationTimestamp": "2024-12-06T16:10:55.664-08:00",
+          "hostname": "test1.test",
+          "keyRevocationActionType": "STOP_ON_KEY_REVOCATION",
+          "fingerprint": "EtB0ssT5Abk=",
+          "labelFingerprint": "1+Ncpx+objk=",
+          "lastStartTimestamp": "2024-12-06T16:11:11.427-08:00",
+          "networkInterfaces": [
+            {
+              "stackType": "IPV4_ONLY",
+              "fingerprint": "RJyxGuQqUn8=",
+              "name": "nic0",
+              "subnetwork": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.9",
+              "network": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/global/networks/default"
+            }
+          ],
+          "networkPerformanceConfig": {
+            "totalEgressBandwidthTier": "DEFAULT"
+          },
+          "id": "2519977093731593313",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/zones/us-central1-a/instances/test1",
+          "deletionProtection": true,
+          "serviceAccounts": [
+            {
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "email": "316788426028-compute@developer.gserviceaccount.com"
+            }
+          ],
+          "resourceStatus": {
+            "scheduling": {}
+          },
+          "cpuPlatform": "Intel Haswell",
+          "labels": {
+            "goog-terraform-provisioned": "true",
+            "label_foo1": "label-bar1"
+          },
+          "status": "RUNNING",
+          "zone": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/zones/us-central1-a",
+          "startRestricted": false,
+          "machineType": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/zones/us-central1-a/machineTypes/n1-standard-1",
+          "canIpForward": true,
+          "tags": {
+            "items": [
+              "bar",
+              "foo"
+            ],
+            "fingerprint": "1gqCRgrww4E="
+          },
+          "scheduling": {
+            "automaticRestart": true,
+            "provisioningModel": "STANDARD",
+            "preemptible": false,
+            "onHostMaintenance": "MIGRATE"
+          },
+          "name": "test1",
+          "disks": [
+            {
+              "autoDelete": true,
+              "interface": "SCSI",
+              "source": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/zones/us-central1-a/disks/tf-test-disk-3",
+              "diskSizeGb": "10",
+              "deviceName": "test-device_name",
+              "mode": "READ_WRITE",
+              "index": 0,
+              "boot": true,
+              "type": "PERSISTENT"
+            },
+            {
+              "autoDelete": true,
+              "savedState": "DISK_SAVED_STATE_UNSPECIFIED",
+              "interface": "SCSI",
+              "deviceName": "test-device_name-3",
+              "diskSizeGb": "375",
+              "boot": false,
+              "index": 1,
+              "type": "SCRATCH",
+              "mode": "READ_WRITE"
+            },
+            {
+              "autoDelete": true,
+              "deviceName": "local-ssd-1",
+              "boot": false,
+              "mode": "READ_WRITE",
+              "interface": "SCSI",
+              "type": "SCRATCH",
+              "savedState": "DISK_SAVED_STATE_UNSPECIFIED",
+              "diskSizeGb": "375",
+              "index": 2
+            },
+            {
+              "boot": false,
+              "diskSizeGb": "10",
+              "type": "PERSISTENT",
+              "mode": "READ_ONLY",
+              "autoDelete": false,
+              "source": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/zones/us-central1-a/disks/tf-test-disk-1",
+              "interface": "SCSI",
+              "index": 3,
+              "deviceName": "test-device_name-1"
+            },
+            {
+              "diskSizeGb": "10",
+              "type": "PERSISTENT",
+              "index": 4,
+              "deviceName": "test-device_name-2",
+              "autoDelete": false,
+              "interface": "SCSI",
+              "mode": "READ_WRITE",
+              "source": "https://www.googleapis.com/compute/v1/projects/terraform-dev-zhenhuali/zones/us-central1-a/disks/tf-test-disk-2",
+              "boot": false
+            }
+          ],
+          "displayDevice": {
+            "enableDisplay": true
+          }
+        },
+        "location": "us-central1-a"
+      },
+      "ancestors": [
+        "projects/316788426028",
+        "folders/808590590506",
+        "folders/376645683816",
+        "organizations/433637338589"
+      ],
+      "updateTime": "2024-12-07T00:11:11.516568Z"
+    }
+]
