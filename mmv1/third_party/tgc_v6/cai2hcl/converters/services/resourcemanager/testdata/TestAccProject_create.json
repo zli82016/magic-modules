@@ -1,0 +1,31 @@
+[
+    {
+        "name": "//cloudresourcemanager.googleapis.com/projects/674802474495",
+        "assetType": "cloudresourcemanager.googleapis.com/Project",
+        "resource": {
+            "version": "v1",
+            "discoveryDocumentUri": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v1",
+            "discoveryName": "Project",
+            "parent": "//cloudresourcemanager.googleapis.com/organizations/529579013760",
+            "data": {
+                "projectId": "tf-test-872899419570852129",
+                "name": "tf-test-872899419570852129",
+                "parent": {
+                    "type": "organization",
+                    "id": "529579013760"
+                },
+                "labels": {
+                    "goog-terraform-provisioned": "true"
+                },
+                "projectNumber": "674802474495",
+                "lifecycleState": "DELETE_REQUESTED",
+                "createTime": "2024-12-18T07:37:39.061Z"
+            }
+        },
+        "ancestors": [
+            "projects/674802474495",
+            "organizations/529579013760"
+        ],
+        "updateTime": "2024-12-18T07:38:05.867338Z"
+    }
+]
