@@ -5206,6 +5206,108 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withDNSConfigWithUnspecifiedScope(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "DNS_SCOPE_UNSPECIFIED", networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withDNSConfigWithoutDnsScope(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withoutDNSConfig(clusterName, "CLOUD_DNS", domainName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withDNSConfigClusterScope(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "CLUSTER_SCOPE", networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -5954,7 +6056,7 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, false, ""),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, false, ""),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -5963,7 +6065,7 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, true, false, ""),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, true, false, ""),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -5972,7 +6074,7 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, true, ""),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, true, ""),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -5981,7 +6083,7 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, true, true, ""),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, true, true, ""),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -6004,7 +6106,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, false, domain),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, false, domain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -6016,7 +6118,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, true, false, domain),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, true, false, domain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -6028,7 +6130,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, true, domain),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, true, domain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -6040,32 +6142,10 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, true, true, domain),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, true, true, domain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
-			},
-			{
-				ResourceName:            "google_container_cluster.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-		},
-	})
-}
-
-func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, false, true, true, false, ""),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -6088,7 +6168,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, false, ""),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, false, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", ""),
 				),
@@ -6100,7 +6180,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, false, domain),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, false, domain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -6113,7 +6193,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, true, true, false, false, ""),
+				Config: testAccContainerCluster_autopilot_withDNSConfig(clusterName, true, false, false, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", ""),
 				),
@@ -10921,6 +11001,24 @@ resource "google_container_cluster" "primary" {
 `, clusterName, clusterDns, clusterDnsDomain, clusterDnsScope, networkName, subnetworkName)
 }
 
+func testAccContainerCluster_withoutDNSConfig(clusterName, clusterDns, clusterDnsDomain, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  dns_config {
+    cluster_dns        = "%s"
+    cluster_dns_domain = "%s"
+  }
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, clusterName, clusterDns, clusterDnsDomain, networkName, subnetworkName)
+}
+
 func testAccContainerCluster_withGatewayApiConfig(clusterName, gatewayApiChannel, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -11477,22 +11575,14 @@ resource "google_container_cluster" "primary" {
 }`, name)
 }
 
-func testAccContainerCluster_withAdvancedDNSConfig(name string, autopilot, dnsConfigSectionPresent, clusterDnsPresent, clusterDnsScopePresent bool, additiveVpcDnsDomain string) string {
+func testAccContainerCluster_autopilot_withDNSConfig(name string, dnsConfigSectionPresent, clusterDnsPresent, clusterDnsScopePresent bool, additiveVpcDnsDomain string) string {
 	config := fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name                = "%s"
   location            = "us-central1"
+  enable_autopilot    = true
   deletion_protection = false
 `, name)
-	if autopilot {
-		config += `
-  enable_autopilot    = true
-`
-	} else {
-		config += `
-  initial_node_count = 2
-`
-	}
 	if dnsConfigSectionPresent {
 		config += `
   dns_config {
