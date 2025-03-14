@@ -1615,7 +1615,7 @@ resource "google_composer_environment" "test" {
       image_version = "composer-1-airflow-2"
     }
     private_environment_config {
-      enable_private_endpoint = true
+      enable_private_endpoint = false
       enable_privately_used_public_ips = true
   	}
   }
