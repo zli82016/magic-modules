@@ -15,6 +15,7 @@ package tfplan
 
 import (
 	"fmt"
+	"strings"
 
 	tfjson "github.com/hashicorp/terraform-json"
 )
@@ -53,4 +54,36 @@ func ReadResourceChanges(data []byte) ([]*tfjson.ResourceChange, error) {
 	}
 
 	return plan.ResourceChanges, nil
+}
+
+func TransformResourceChanges(changes []*tfjson.ResourceChange) []map[string]interface{} {
+	resourceChanges := make([]map[string]interface{}, 0)
+	for _, rc := range changes {
+		// Silently skip non-google resources
+		if !strings.HasPrefix(rc.Type, "google_") {
+			continue
+		}
+
+		if IsCreate(rc) || IsUpdate(rc) || IsDeleteCreate(rc) {
+			rChange := map[string]interface{}{
+				"type":     rc.Type,
+				"change":   rc.Change.After,
+				"isDelete": false,
+				"address":  rc.Address,
+			}
+			resourceChanges = append(resourceChanges, rChange)
+		} else if IsDelete(rc) {
+			rChange := map[string]interface{}{
+				"type":     rc.Type,
+				"change":   rc.Change.Before,
+				"isDelete": true,
+				"address":  rc.Address,
+			}
+			resourceChanges = append(resourceChanges, rChange)
+		} else {
+			continue
+		}
+	}
+
+	return resourceChanges
 }

@@ -1,0 +1,22 @@
+package {{$.Product}}_test
+
+import (
+	"testing"
+)
+
+func Test{{$.Resource}}(t *testing.T) {
+	test.AssertTestFiles(
+		t,
+		"../../data/services/{{$.Product}}",
+		[]string{
+{{- range $test := $.Tests }}
+	"{{ $test }}",
+{{- end }}
+		},
+		[]string{
+{{- range $field := $.ExcludedFields }}
+	"{{ $field }}",
+{{- end }}
+		},
+	)
+}
