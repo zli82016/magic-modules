@@ -36,8 +36,8 @@ func NewComputeInstanceConverter(provider *schema.Provider) models.Converter {
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceConverter) Convert(asset *caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil && asset.Resource.Data == nil {
+func (c *ComputeInstanceConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil && asset.Resource.Data == nil {
 		return nil, nil
 	}
 	var blocks []*models.TerraformResourceBlock
@@ -49,8 +49,8 @@ func (c *ComputeInstanceConverter) Convert(asset *caiasset.Asset) ([]*models.Ter
 	return blocks, nil
 }
 
-func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil || asset.Resource.Data == nil {
+func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
@@ -84,7 +84,11 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 	hclData["service_account"] = flattenServiceAccounts(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
 
-	bootDisk, ads, scratchDisks := flattenDisks(instance.Disks, instance.Name)
+	bootDisk, ads, scratchDisks, err := flattenDisks(instance.Disks, instance.Name, asset.Resource.Data["disks"])
+	if err != nil {
+		return nil, err
+	}
+
 	hclData["boot_disk"] = bootDisk
 	hclData["attached_disk"] = ads
 	hclData["scratch_disk"] = scratchDisks
@@ -107,6 +111,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
 	hclData["reservation_affinity"] = flattenReservationAffinity(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = instance.KeyRevocationActionType
+	// hclData["project"] = project
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
 	// It needs to integrate the disk assets into instance assets with the resolver.
@@ -122,13 +127,25 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 
 }
 
-func flattenDisks(disks []*compute.AttachedDisk, instanceName string) ([]map[string]interface{}, []map[string]interface{}, []map[string]interface{}) {
+func flattenDisks(disks []*compute.AttachedDisk, instanceName string, bootDisks interface{}) ([]map[string]interface{}, []map[string]interface{}, []map[string]interface{}, error) {
 	attachedDisks := []map[string]interface{}{}
 	bootDisk := []map[string]interface{}{}
 	scratchDisks := []map[string]interface{}{}
-	for _, disk := range disks {
+	for i, disk := range disks {
 		if disk.Boot {
-			bootDisk = flattenBootDisk(disk, instanceName)
+			var bootDiskDetails interface{}
+			if bootDisks != nil {
+				rawDisk := bootDisks.([]interface{})[i]
+				if rawDisk != nil {
+					bootDiskData := rawDisk.(map[string]interface{})
+					bootDiskDetails = bootDiskData["details"]
+				}
+			}
+			var err error
+			bootDisk, err = flattenBootDisk(disk, instanceName, bootDiskDetails)
+			if err != nil {
+				return bootDisk, nil, nil, err
+			}
 		} else if disk.Type == "SCRATCH" {
 			scratchDisks = append(scratchDisks, flattenScratchDisk(disk))
 		} else {
@@ -156,10 +173,10 @@ func flattenDisks(disks []*compute.AttachedDisk, instanceName string) ([]map[str
 			ads = append(ads, d)
 		}
 	}
-	return bootDisk, ads, scratchDisks
+	return bootDisk, ads, scratchDisks, nil
 }
 
-func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[string]interface{} {
+func flattenBootDisk(disk *compute.AttachedDisk, instanceName string, bootDiskDetails interface{}) ([]map[string]interface{}, error) {
 	result := map[string]interface{}{}
 
 	if !disk.AutoDelete {
@@ -183,19 +200,41 @@ func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[stri
 	}
 
 	// Don't convert the field with the default value
-	if disk.Interface != "SCSI" {
-		result["interface"] = disk.Interface
-	}
+	// if disk.Interface != "SCSI" {
+	result["interface"] = disk.Interface
+	// }
 
 	if !strings.HasSuffix(disk.Source, instanceName) {
 		result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
 	}
 
-	if len(result) == 0 {
-		return nil
+	if bootDiskDetails != nil {
+		var diskDetails *compute.Disk
+		if err := utils.DecodeJSON(bootDiskDetails.(map[string]interface{}), &diskDetails); err != nil {
+			return nil, err
+		}
+
+		result["initialize_params"] = []map[string]interface{}{{
+			"type": tpgresource.GetResourceNameFromSelfLink(diskDetails.Type),
+			// If the config specifies a family name that doesn't match the image name, then
+			// the diff won't be properly suppressed. See DiffSuppressFunc for this field.
+			"image":                       diskDetails.SourceImage,
+			"architecture":                diskDetails.Architecture,
+			"size":                        diskDetails.SizeGb,
+			"labels":                      diskDetails.Labels,
+			"resource_policies":           diskDetails.ResourcePolicies,
+			"provisioned_iops":            diskDetails.ProvisionedIops,
+			"provisioned_throughput":      diskDetails.ProvisionedThroughput,
+			"enable_confidential_compute": diskDetails.EnableConfidentialCompute,
+			"storage_pool":                tpgresource.GetResourceNameFromSelfLink(diskDetails.StoragePool),
+		}}
 	}
 
-	return []map[string]interface{}{result}
+	if len(result) == 0 {
+		return nil, nil
+	}
+
+	return []map[string]interface{}{result}, nil
 }
 
 func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
@@ -208,9 +247,9 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 	}
 
 	// Don't convert the field with the default value
-	if disk.Interface != "SCSI" {
-		result["interface"] = disk.Interface
-	}
+	// if disk.Interface != "SCSI" {
+	result["interface"] = disk.Interface
+	// }
 
 	return result
 }

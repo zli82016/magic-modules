@@ -106,55 +106,25 @@ func TestReadResourceChanges(t *testing.T) {
 	wantJSON := []byte(`
 [
 	{
-		"address": "module.foo.google_compute_instance.quz1",
-		"mode": "managed",
 		"type": "google_compute_instance",
-		"name": "quz1",
-		"provider_name": "google",
 		"change": {
-			"actions": ["delete", "create"],
-			"before": {"key1": "value1"},
-			"after": {
-				"key1": "value1",
-				"nestedKey1": { "insideKey1": "insideValue1"}
-			}
-		}
+			"key1": "value1",
+			"nestedKey1": { "insideKey1": "insideValue1"}
+		},
+		"isDelete": false,
+		"address": "module.foo.google_compute_instance.quz1"
 	},
 	{
-		"address": "module.foo.bar.google_compute_instance.quz2",
-		"mode": "managed",
 		"type": "google_compute_instance",
-		"name": "quz2",
-		"provider_name": "google",
-		"change": {
-			"actions": ["noop"],
-			"before": {"key2": "value2"},
-			"after": {"key2": "value2"}
-		}
+		"change": {"key3": "value3"},
+		"isDelete": true,
+		"address": "module.foo.bar.google_compute_instance.quz3"
 	},
 	{
-		"address": "module.foo.bar.google_compute_instance.quz3",
-		"mode": "managed",
 		"type": "google_compute_instance",
-		"name": "quz3",
-		"provider_name": "google",
-		"change": {
-			"actions": ["delete"],
-			"before": {"key3": "value3"},
-			"after": {}
-		}
-	},
-	{
-		"address": "module.foo.bar.google_compute_instance.quz4",
-		"mode": "managed",
-		"type": "google_compute_instance",
-		"name": "quz4",
-		"provider_name": "google",
-		"change": {
-			"actions": ["create"],
-			"before": {},
-			"after": {"key4": "value4"}
-		}
+		"change": {"key4": "value4"},
+		"isDelete": false,
+		"address": "module.foo.bar.google_compute_instance.quz4"
 	}
 ]
 `)
@@ -163,7 +133,8 @@ func TestReadResourceChanges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parsing %s: %v", string(data), err)
 	}
-	gotJSON, err := json.Marshal(rcs)
+	transformed := TransformResourceChanges(rcs)
+	gotJSON, err := json.Marshal(transformed)
 	if err != nil {
 		t.Fatalf("marshaling: %v", err)
 	}
