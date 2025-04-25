@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+<<<<<<< HEAD
+=======
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+>>>>>>> 0c4abda41 (test)
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/googleapi"
 
@@ -1521,7 +1525,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 
 	for i := 0; i < attachedDisksCount; i++ {
 		diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-		disk, err := expandAttachedDisk(diskConfig, d, config)
+		disk, err := expandAttachedDiskForTgc(diskConfig, d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -1529,7 +1533,11 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		disks = append(disks, disk)
 	}
 
+<<<<<<< HEAD
 	scheduling, err := expandSchedulingTgc(d.Get("scheduling"))
+=======
+	scheduling, err := expandSchedulingForTgc(d.Get("scheduling"))
+>>>>>>> 0c4abda41 (test)
 	if err != nil {
 		return nil, fmt.Errorf("error creating scheduling: %s", err)
 	}
@@ -1596,9 +1604,26 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DisplayDevice:              expandDisplayDevice(d),
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
+<<<<<<< HEAD
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
+=======
+		KeyRevocationActionType:    expandKeyRevocationActionType(d),
+>>>>>>> 0c4abda41 (test)
 		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
 	}, nil
+}
+
+func expandKeyRevocationActionType(d tpgresource.TerraformResourceData) string {
+	raw, ok := d.GetOk("key_revocation_action_type")
+	if !ok {
+		return ""
+	}
+
+	v := raw.(string)
+	if v != "" {
+		return fmt.Sprintf("%s_ON_KEY_REVOCATION", v)
+	}
+	return ""
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
@@ -2062,3 +2087,81 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	}
 	return scheduling, nil
 }
+<<<<<<< HEAD
+=======
+
+func expandAttachedDiskForTgc(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+	config := meta.(*transport_tpg.Config)
+
+	s := diskConfig["source"].(string)
+	var sourceLink string
+	if strings.Contains(s, "regions/") {
+		source, err := tpgresource.ParseRegionDiskFieldValue(s, d, config)
+		if err != nil {
+			return nil, err
+		}
+		sourceLink = source.RelativeLink()
+	} else {
+		source, err := tpgresource.ParseDiskFieldValue(s, d, config)
+		if err != nil {
+			return nil, err
+		}
+		sourceLink = source.RelativeLink()
+	}
+
+	disk := &compute.AttachedDisk{
+		Source: fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", sourceLink),
+	}
+
+	if v, ok := diskConfig["mode"]; ok {
+		disk.Mode = v.(string)
+	}
+
+	if v, ok := diskConfig["device_name"]; ok {
+		disk.DeviceName = v.(string)
+	}
+
+	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
+	if keyOk {
+		if keyValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RawKey: keyValue.(string),
+			}
+		}
+	}
+
+	keyValue, keyOk = diskConfig["disk_encryption_key_rsa"]
+	if keyOk {
+		if keyValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RsaEncryptedKey: keyValue.(string),
+			}
+		}
+	}
+
+	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
+	if kmsOk {
+		if keyOk && keyValue != "" && kmsValue != "" {
+			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
+		}
+		if kmsValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				KmsKeyName: kmsValue.(string),
+			}
+		}
+	}
+
+	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
+	if kmsServiceAccountOk {
+		if kmsServiceAccount != "" {
+			if disk.DiskEncryptionKey == nil {
+				disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+					KmsKeyServiceAccount: kmsServiceAccount.(string),
+				}
+			}
+			disk.DiskEncryptionKey.KmsKeyServiceAccount = kmsServiceAccount.(string)
+		}
+	}
+	return disk, nil
+}
+>>>>>>> 0c4abda41 (test)
