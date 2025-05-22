@@ -39,14 +39,15 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 	}
 	defer os.RemoveAll(tfDir)
 
-	fileName := t.Name()
-	testMetadata := TestConfig[fileName]
+	testMetadata := TestConfig[t.Name()]
 	address := testMetadata.Address
 
 	jsonData, err := json.MarshalIndent(testMetadata.Assets, "", "  ")
 	if err != nil {
 		log.Fatalf("Error marshalling to JSON: %s", err)
 	}
+
+	fileName := t.Name()
 	assetFile := fmt.Sprintf("%s.json", fileName)
 	err = ioutil.WriteFile(assetFile, jsonData, 0644)
 	if err != nil {

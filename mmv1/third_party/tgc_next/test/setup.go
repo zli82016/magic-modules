@@ -22,8 +22,30 @@ type TestMetadata struct {
 	Assets     []caiasset.Asset
 }
 
+type ResourceMetadata struct {
+	CaiAssetName    string         `json:"cai_asset_name"`
+	CaiAssetData    interface{}    `json:"cai_asset_data"`
+	ResourceType    string         `json:"resource_type"`
+	ResourceAddress string         `json:"resource_address"`
+	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
+	Service         string         `json:"service"`
+}
+
+type ImportMetadata struct {
+	Id            string   `json:"id,omitempty"`
+	IgnoredFields []string `json:"ignored_fields,omitempty"`
+}
+
+type TgcMetadataPayload struct {
+	TestName         string                       `json:"test_name"`
+	RawConfig        string                       `json:"raw_config"`
+	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
+	PrimaryResource  string                       `json:"primary_resource"`
+	ConfigChanged    bool                         `json:"-"`
+}
+
 var (
-	TestConfig = make(map[string]TestMetadata)
+	TestConfig = make(map[string]TgcMetadataPayload)
 	setupDone  = false
 	cacheMutex = sync.Mutex{}
 )
@@ -32,7 +54,7 @@ func ReadTestsDataFromGcs() error {
 	if !setupDone {
 		cacheMutex.Lock()
 
-		bucketName := "cai_assets_metadata"
+		bucketName := "cai_assets"
 		currentDate := time.Now()
 
 		for len(TestConfig) == 0 {
