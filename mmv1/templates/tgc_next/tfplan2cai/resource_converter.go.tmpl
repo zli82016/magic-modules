@@ -134,15 +134,28 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 
 {{ if $.CustomCode.Encoder -}}
-    return resource{{ $.ResourceName -}}Encoder(d, config, obj)
+    obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
+    if err != nil {
+        return nil, err
+    }
+{{- end }}
+
+{{- if $.CustomCode.TgcEncoder }}
+    return resource{{ $.ResourceName -}}TgcEncoder(d, config, obj)
 {{- else }}
     return obj, nil
-{{- end}}
+{{- end }}
 }
 
 {{if $.CustomCode.Encoder -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 {{ $.CustomTemplate $.CustomCode.Encoder false -}}
+}
+{{- end}}
+
+{{if $.CustomCode.TgcEncoder -}}
+func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{ $.CustomTemplate $.CustomCode.TgcEncoder false -}}
 }
 {{- end}}
 

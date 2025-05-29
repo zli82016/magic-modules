@@ -87,6 +87,27 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 
 	hclData := make(map[string]interface{})
 
+{{ if $.CustomCode.TgcDecoder -}}
+    res, err = resource{{ $.ResourceName -}}TgcDecoder(d, meta, res)
+    if err != nil {
+        return nil, err
+    }
+{{ end}}
+
+{{ if $.CustomCode.Decoder -}}
+    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    if err != nil {
+        return nil, err
+    }
+
+    if res == nil {
+        // Decoding the object has resulted in it being gone. It may be marked deleted.
+        return nil, nil
+    }
+{{ end}}
+
+    hclData := make(map[string]interface{})
+
 {{ range $prop := $.ReadPropertiesForTgc }}
 {{   if $prop.FlattenObject -}}
 {{/* TODO */}}
@@ -113,4 +134,16 @@ func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *sch
     {{ else }}
         {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
+{{- end }}
+
+{{- if $.CustomCode.TgcDecoder }}
+func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    {{ $.CustomTemplate $.CustomCode.TgcDecoder false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.Decoder }}
+func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    {{ $.CustomTemplate $.CustomCode.Decoder false -}}
+}
 {{- end }}
