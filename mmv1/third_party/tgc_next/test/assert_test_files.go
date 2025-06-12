@@ -259,36 +259,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	// Step 3
 	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
-<<<<<<< HEAD
 	if err = compareCaiAssets(assets, roundtripAssets, ignoredFieldSet); err != nil {
 		return err
-=======
-	assetMap := convertToAssetMap(assets)
-	roundtripAssetMap := convertToAssetMap(roundtripAssets)
-	for assetType, asset := range assetMap {
-		if roundtripAsset, ok := roundtripAssetMap[assetType]; !ok {
-			return fmt.Errorf("roundtrip asset for type %s is missing", assetType)
-		} else {
-			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
-				return err
-			}
-			if diff := cmp.Diff(
-				asset.Resource,
-				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data"),
-				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
-				cmp.FilterPath(func(p cmp.Path) bool {
-					return p.Last().String() == ".DiscoveryDocumentURI"
-				}, cmp.Comparer(func(x, y string) bool {
-					parts1 := strings.Split(x, "/")
-					parts2 := strings.Split(y, "/")
-					return len(parts1) == len(parts2)
-				})),
-			); diff != "" {
-				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
-			}
-		}
->>>>>>> 75e1c9e8dd (tgc-revival: modify testing Version and DiscoveryDocumentURI)
 	}
 	log.Printf("%s: Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testName, testData.ResourceAddress)
 
