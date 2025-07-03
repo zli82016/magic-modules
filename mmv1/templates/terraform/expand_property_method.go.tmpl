@@ -160,7 +160,11 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     {{ if $.NestedProperties }}
       {{- range $prop := $.NestedProperties }}
         {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
+          {{- if ne $.ResourceMetadata.Compiler "terraformgoogleconversion-codegen" }}
           {{- template "expandPropertyMethod" $prop -}}
+          {{- else }}
+          {{- template "expandTgcPropertyMethod" $prop -}}
+          {{- end }}
         {{- end }}
       {{- end }}
     {{- end }}{{/* if $.NestedProperties */}}

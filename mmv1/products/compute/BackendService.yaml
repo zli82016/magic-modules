@@ -43,6 +43,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
@@ -96,12 +97,18 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    tgc_test_ignore_in_asset:
+      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    tgc_test_ignore_extra:
+      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
+    tgc_test_ignore_in_asset:
+      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -147,6 +154,8 @@ examples:
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
+    tgc_test_ignore_in_asset:
+      - 'RESOURCE.enableCDN' # It has false value in CAI asset
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -158,6 +167,7 @@ properties:
       maximum allowed value for TTL is one day.
 
       When the load balancing scheme is INTERNAL, this field is not used.
+    include_empty_value_in_cai: true
   - name: 'backend'
     type: Array
     description: |
@@ -327,6 +337,7 @@ properties:
                 description: |
                   If true, the metric data is collected and reported to Cloud
                   Monitoring, but is not used for load balancing.
+                include_empty_value_in_cai: true
               - name: 'maxUtilization'
                 type: Double
                 description: |
@@ -608,6 +619,7 @@ properties:
               - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
             item_type:
               type: String
+            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
           - name: 'queryStringWhitelist'
             type: Array
             description: |
@@ -619,6 +631,7 @@ properties:
               delimiters.
             is_set: true
             send_empty_value: true
+            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
             at_least_one_of:
               - 'cdn_policy.0.cache_key_policy.0.include_host'
               - 'cdn_policy.0.cache_key_policy.0.include_protocol'
@@ -795,6 +808,7 @@ properties:
     type: Boolean
     description: |
       If true, enable Cloud CDN for this BackendService.
+    include_empty_value_in_cai: true
   - name: 'healthChecks'
     type: Array
     description: |
@@ -844,6 +858,7 @@ properties:
         ignore_read: true
         sensitive: true
         send_empty_value: true
+        is_missing_in_cai: true
       - name: 'oauth2ClientSecretSha256'
         type: String
         description: |
@@ -1405,6 +1420,7 @@ properties:
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
         resource: 'ClientTlsPolicy'
         imports: 'name'
+        custom_tgc_expand: 'templates/tgc_next/custom_expand/original_value.go.tmpl'
       - name: 'subjectAltNames'
         type: Array
         description: |
@@ -1673,3 +1689,4 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+    is_missing_in_cai: true
