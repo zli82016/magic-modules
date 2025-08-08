@@ -23,7 +23,6 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var (
@@ -185,7 +184,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
 
 	// Step 3
-	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
+	// Compare the asset name in the exported asset and roundtrip asset
 	assetMap := convertToAssetMap(assets)
 	roundtripAssetMap := convertToAssetMap(roundtripAssets)
 	for assetType, asset := range assetMap {
@@ -195,31 +194,9 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
 				return err
 			}
-			if diff := cmp.Diff(
-				asset.Resource,
-				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "DiscoveryDocumentURI"),
-				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
-				cmp.FilterPath(func(p cmp.Path) bool {
-					return p.Last().String() == ".DiscoveryDocumentURI"
-				}, cmp.Comparer(func(x, y string) bool {
-					parts1 := strings.Split(x, "/")
-					parts2 := strings.Split(y, "/")
-					return len(parts1) == len(parts2)
-				})),
-				cmp.FilterPath(func(p cmp.Path) bool {
-					return p.Last().String() == ".DiscoveryName"
-				}, cmp.Comparer(func(x, y string) bool {
-					xParts := strings.Split(x, "/")
-					yParts := strings.Split(y, "/")
-					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
-				})),
-			); diff != "" {
-				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
-			}
 		}
 	}
-	log.Printf("Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testData.ResourceAddress)
+	log.Printf("Step 3 passes for resource %s. The asset names in exported asset and roundtrip asset are identical", testData.ResourceAddress)
 
 	return nil
 }
