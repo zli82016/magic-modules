@@ -50,6 +50,7 @@ iam_policy:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
