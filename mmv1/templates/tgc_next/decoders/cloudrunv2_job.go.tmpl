@@ -1,0 +1,19 @@
+// The API object and CAI asset have different structure
+if rawSpec, ok := res["spec"]; ok {
+    if spec, ok := rawSpec.(map[string]interface{}); ok {
+        if rawTemplate, ok := res["template"]; ok {
+            if template, ok := rawTemplate.(map[string]interface{}); ok {
+                res["template"] = template
+                if rawTSpec, ok := template["spec"]; ok {
+                    if tspec, ok := rawTSpec.(map[string]interface{}); ok {
+                        for k, v := range tspec {
+                            res["template"][k] = v
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+return res, nil
