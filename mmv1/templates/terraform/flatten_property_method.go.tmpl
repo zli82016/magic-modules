@@ -164,7 +164,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if v == nil {
 		return false
 	}
-	return v
+  return v
+  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Enum") ($.DefaultValue) }}
+	if v == nil {
+		return {{ $.GoLiteral $.DefaultValue }}
+	}
+  return v
   {{- else }}
   return v
 {{- end }}

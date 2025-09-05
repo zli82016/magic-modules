@@ -45,6 +45,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'network_security_tls_inspection_policy_basic'
     primary_resource_id: 'default'
@@ -52,6 +53,8 @@ examples:
       resource_name: 'my-tls-inspection-policy'
       privateca_ca_pool_name: 'my-basic-ca-pool'
       privateca_certificate_authority_id: 'my-basic-certificate-authority'
+    tgc_test_ignore_extra:
+      - 'exclude_public_ca_set' # Ignore its false value in Terraform configuration
   - name: 'network_security_tls_inspection_policy_custom'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -60,6 +63,8 @@ examples:
       privateca_ca_pool_name: 'my-basic-ca-pool'
       privateca_certificate_authority_id: 'my-basic-certificate-authority'
       trust_config_name: 'my-trust-config'
+    tgc_test_ignore_extra:
+      - 'exclude_public_ca_set' # Ignore its false value in Terraform configuration
 parameters:
   - name: 'name'
     type: String
