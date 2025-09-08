@@ -12,15 +12,18 @@ import (
 
 // ResourceYAMLMetadata represents the structure of the metadata files
 type ResourceYAMLMetadata struct {
-	Resource       string `yaml:"resource"`
-	ApiServiceName string `yaml:"api_service_name"`
-	SourceFile     string `yaml:"source_file"`
+	Resource              string `yaml:"resource"`
+	ApiServiceName        string `yaml:"api_service_name"`
+	CaiResourceNameFormat string `yaml:"cai_resource_name_format"`
+	SourceFile            string `yaml:"source_file"`
 }
 
 // Cache structures to avoid repeated file system operations
 var (
 	// Cache for API service names (resourceName -> apiServiceName)
 	apiServiceNameCache = make(map[string]string)
+	// Cache for CAI resource name format (resourceName -> caiResourceNameFormat)
+	caiResourceNameFormatCache = make(map[string]string)
 	// Cache for service packages (resourceType -> servicePackage)
 	servicePackageCache = make(map[string]string)
 	// Flag to track if cache has been populated
@@ -78,6 +81,10 @@ func PopulateMetadataCache() error {
 			if metadata.ApiServiceName != "" {
 				apiServiceNameCache[metadata.Resource] = metadata.ApiServiceName
 				apiNameCount++
+			}
+
+			if metadata.CaiResourceNameFormat != "" {
+				caiResourceNameFormatCache[metadata.Resource] = metadata.CaiResourceNameFormat
 			}
 
 			// Extract and store service package in cache
