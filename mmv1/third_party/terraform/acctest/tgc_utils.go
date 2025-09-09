@@ -95,7 +95,7 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 			}
 
 			// Resolve the CAI asset name
-			apiServiceName := GetAPIServiceNameForResource(metadata.ResourceType)
+			apiServiceName := apiServiceNameCache.Get(metadata.ResourceType)
 			if apiServiceName == "unknown" || apiServiceName == "failed_to_populate_metadata_cache" {
 				log.Printf("[DEBUG]TGC Terraform error: unknown resource type %s", metadata.ResourceType)
 				metadata.CaiAssetNames = []string{apiServiceName}
@@ -114,6 +114,8 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 
 				metadata.CaiAssetNames = []string{fmt.Sprintf("//%s/%s", apiServiceName, rName)}
 			}
+
+			log.Printf("[DEBUG] CaiAssetNames %#v", metadata.CaiAssetNames)
 
 			// Resolve auto IDs in import metadata
 			if metadata.ImportMetadata.Id != "" {

@@ -21,6 +21,7 @@ references:
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
 docs:
 id_format: 'projects/{{project}}'
+cai_base_url: 'projects/{{project}}/policy'
 base_url: 'projects/{{project}}/policy'
 self_link: 'projects/{{project}}/policy'
 create_verb: 'PUT'

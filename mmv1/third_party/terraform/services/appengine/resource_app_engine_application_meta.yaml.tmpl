@@ -7,7 +7,7 @@ api_version: 'v1beta'
 api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'Application'
-cai_resource_name_format: 'apps/{{app}}'
+cai_base_url: 'apps/{{"{{"}}app{{"}}"}}'
 fields:
   - field: 'app_id'
   - field: 'auth_domain'

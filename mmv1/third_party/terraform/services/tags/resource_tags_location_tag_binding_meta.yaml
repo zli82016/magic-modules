@@ -3,6 +3,9 @@ generation_type: 'handwritten'
 api_service_name: 'cloudresourcemanager.googleapis.com'
 api_version: 'v3'
 api_resource_type_kind: 'TagBinding'
+tgc:
+  terraform_resource_id_format: '{{location}}/{{name}}'
+  cai_asset_name_format: '{{name}}'
 fields:
   - field: 'location'
   - field: 'name'

@@ -25,6 +25,7 @@ references:
 docs:
 id_format: 'projects/{{project}}/managedZones/{{name}}'
 base_url: 'projects/{{project}}/managedZones'
+cai_identity: 'managed_zone'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

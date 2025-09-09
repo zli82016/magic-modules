@@ -22,6 +22,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceSettings'
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings'
+cai_base_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings/InstanceSettings'
 self_link: 'projects/{{project}}/zones/{{zone}}/instanceSettings'
 create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
 create_verb: 'PATCH'
