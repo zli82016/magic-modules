@@ -9,9 +9,11 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
 )
 
-func parseHCLBytes(src []byte, filePath string) (map[string]map[string]struct{}, error) {
+func parseHCLBytes(src []byte, filePath string) (map[string]map[string]any, error) {
 	parser := hclparse.NewParser()
 	hclFile, diags := parser.ParseHCL(src, filePath)
 	if diags.HasErrors() {
@@ -22,7 +24,7 @@ func parseHCLBytes(src []byte, filePath string) (map[string]map[string]struct{},
 		return nil, fmt.Errorf("parsed HCL file %s is nil cannot proceed", filePath)
 	}
 
-	parsed := make(map[string]map[string]struct{})
+	parsed := make(map[string]map[string]any)
 
 	for _, block := range hclFile.Body.(*hclsyntax.Body).Blocks {
 		if block.Type == "resource" {
@@ -43,7 +45,7 @@ func parseHCLBytes(src []byte, filePath string) (map[string]map[string]struct{},
 				}
 			}
 
-			flattenedAttrs := make(map[string]struct{})
+			flattenedAttrs := make(map[string]any)
 			flatten(attrs, "", flattenedAttrs)
 			parsed[addr] = flattenedAttrs
 		}
@@ -61,7 +63,7 @@ func parseHCLBody(body hcl.Body) (
 
 	if syntaxBody, ok := body.(*hclsyntax.Body); ok {
 		for _, attr := range syntaxBody.Attributes {
-			insert(struct{}{}, attr.Name, attributes)
+			insert(value(attr.Expr, attr.Name), attr.Name, attributes)
 		}
 
 		for _, block := range syntaxBody.Blocks {
@@ -96,7 +98,7 @@ func insert(data any, key string, parent map[string]any) {
 	}
 }
 
-func flatten(data any, prefix string, result map[string]struct{}) {
+func flatten(data any, prefix string, result map[string]any) {
 	switch v := data.(type) {
 	case map[string]any:
 		for key, value := range v {
@@ -110,12 +112,12 @@ func flatten(data any, prefix string, result map[string]struct{}) {
 		flattenSlice(prefix, v, result)
 	default:
 		if prefix != "" {
-			result[prefix] = struct{}{}
+			result[prefix] = v
 		}
 	}
 }
 
-func flattenSlice(prefix string, v []any, result map[string]struct{}) {
+func flattenSlice(prefix string, v []any, result map[string]any) {
 	if len(v) == 0 && prefix != "" {
 		result[prefix] = struct{}{}
 		return
@@ -123,12 +125,12 @@ func flattenSlice(prefix string, v []any, result map[string]struct{}) {
 
 	type sortableElement struct {
 		flatKeys  string
-		flattened map[string]struct{}
+		flattened map[string]any
 	}
 
 	sortable := make([]sortableElement, len(v))
 	for i, value := range v {
-		flattened := make(map[string]struct{})
+		flattened := make(map[string]any)
 		flatten(value, "", flattened)
 		keys := make([]string, 0, len(flattened))
 		for k := range flattened {
@@ -160,5 +162,51 @@ func flattenSlice(prefix string, v []any, result map[string]struct{}) {
 				result[newKey] = struct{}{}
 			}
 		}
+	}
+}
+
+// Gets the value of the expression of an attribute
+func value(expr hcl.Expression, name string) any {
+	switch expr := expr.(type) {
+	case *hclsyntax.LiteralValueExpr:
+		return convertValueToString(expr.Val)
+	case *hclsyntax.TemplateExpr:
+		vStr := ""
+		parts := expr.Parts
+		for _, part := range parts {
+			vStr += value(part, "").(string)
+		}
+		return vStr
+	case *hclsyntax.ObjectConsKeyExpr:
+		return value(expr.Wrapped, name).(string)
+	case *hclsyntax.ObjectConsExpr:
+		vMap := map[string]any{}
+
+		for i := range expr.Items {
+			item := expr.Items[i]
+
+			vMap[value(item.KeyExpr, "").(string)] = value(item.ValueExpr, "")
+		}
+
+		return vMap
+	default:
+	}
+
+	return ""
+}
+
+func convertValueToString(val cty.Value) any {
+	switch val.Type() {
+	case cty.Number:
+		return val.AsBigFloat()
+	case cty.String:
+		return val.AsString()
+	case cty.Bool:
+		var v bool
+		_ = gocty.FromCtyValue(val, &v)
+		return v
+		// return fmt.Sprintf("%v", v)
+	default:
+		return ""
 	}
 }

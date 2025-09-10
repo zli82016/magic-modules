@@ -40,14 +40,14 @@ type TgcMetadataPayload struct {
 }
 
 type ResourceTestData struct {
-	ParsedRawConfig  map[string]struct{} `json:"parsed_raw_config"`
+	ParsedRawConfig  map[string]any `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
 }
 
 type Resource struct {
-	Type       string              `json:"type"`
-	Name       string              `json:"name"`
-	Attributes map[string]struct{} `json:"attributes"`
+	Type       string         `json:"type"`
+	Name       string         `json:"name"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 const (
@@ -178,6 +178,8 @@ func prepareTestData(testName string, retries int) (map[string]ResourceTestData,
 	}
 
 	rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
+	writeJSONFile("rawResourceConfigs.json", rawResourceConfigs)
+
 	if err != nil {
 		return nil, "", fmt.Errorf("error parsing resource configs: %#v", err)
 	}
@@ -227,8 +229,8 @@ func parseResourceConfigs(filePath string) ([]Resource, error) {
 }
 
 // Converts the slice to map with resource address as the key
-func convertToConfigMap(resources []Resource) map[string]map[string]struct{} {
-	configMap := make(map[string]map[string]struct{}, 0)
+func convertToConfigMap(resources []Resource) map[string]map[string]any {
+	configMap := make(map[string]map[string]any, 0)
 
 	for _, r := range resources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)
