@@ -3,9 +3,8 @@ generation_type: 'handwritten'
 api_service_name: 'dataflow.googleapis.com'
 api_version: 'v1beta3'
 api_resource_type_kind: 'Job'
-tgc:
-  terraform_resource_id_format: '{{job}}'
-  cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/jobs/{{job}}'
+terraform_resource_id_format: '{{job}}'
+cai_asset_name_format: '//dataflow.googleapis.com/projects/{{project}}/locations/{{location}}/jobs/{{job}}'
 fields:
   - field: 'additional_experiments'
   - field: 'effective_labels'

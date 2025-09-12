@@ -12,18 +12,18 @@ import (
 
 // ResourceYAMLMetadata represents the structure of the metadata files
 type ResourceYAMLMetadata struct {
-	Resource              string `yaml:"resource"`
-	ApiServiceName        string `yaml:"api_service_name"`
-	CaiResourceNameFormat string `yaml:"cai_base_url"`
-	SourceFile            string `yaml:"source_file"`
+	Resource           string `yaml:"resource"`
+	ApiServiceName     string `yaml:"api_service_name"`
+	CaiAssetNameFormat string `yaml:"cai_asset_name_format"`
+	SourceFile         string `yaml:"source_file"`
 }
 
 // Cache structures to avoid repeated file system operations
 var (
 	// Cache for API service names (resourceName -> apiServiceName)
 	apiServiceNameCache = NewGenericCache("unknown")
-	// Cache for CAI resource name format (resourceName -> caiResourceNameFormat)
-	caiResourceNameFormatCache = NewGenericCache("")
+	// Cache for CAI resource name format (resourceName -> CaiAssetNameFormat)
+	CaiAssetNameFormatCache = NewGenericCache("")
 	// Cache for service packages (resourceType -> servicePackage)
 	servicePackageCache = NewGenericCache("unknown")
 	// Flag to track if cache has been populated
@@ -83,8 +83,8 @@ func PopulateMetadataCache() error {
 				apiNameCount++
 			}
 
-			if metadata.CaiResourceNameFormat != "" {
-				caiResourceNameFormatCache.Set(metadata.Resource, metadata.CaiResourceNameFormat)
+			if metadata.CaiAssetNameFormat != "" {
+				CaiAssetNameFormatCache.Set(metadata.Resource, metadata.CaiAssetNameFormat)
 			}
 
 			// Extract and store service package in cache
