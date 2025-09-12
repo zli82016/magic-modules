@@ -20,6 +20,7 @@ description: |
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies'
+# cai_base_url: 'projects/{{project}}/regions/{{location}}/autoscalingPolicies'
 self_link: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'

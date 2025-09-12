@@ -29,6 +29,7 @@ docs:
     [Terraform docs](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#prevent_destroy)
     for more information on lifecycle parameters.
 id_format: '{{instance}}/{{name}}'
+# cai_base_url: 'projects/{{project}}/instances/{{instance}}/databases'
 base_url: 'projects/{{project}}/instances/{{instance}}/databases'
 update_verb: 'PATCH'
 update_mask: true

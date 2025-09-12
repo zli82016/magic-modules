@@ -391,6 +391,8 @@ type TGCResource struct {
 	// Other values are normally useful in cases where an object has a parent
 	// and is identified by some non-name value, such as an ip+port pair.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	CaiResourceNameFormat string `yaml:"cai_resource_name_format"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
