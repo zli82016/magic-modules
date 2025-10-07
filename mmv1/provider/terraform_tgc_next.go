@@ -60,6 +60,7 @@ type ResourceIdentifier struct {
 	AliasName          string // It can be "Default" or the same with ResourceName
 	CaiAssetNameFormat string
 	IdentityParam      string
+	CaiAssetType       string
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
@@ -163,6 +164,9 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
 		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
+		"pkg/resource.txt":                               "templates/tgc_next/tfplan2cai/resource.go.tmpl",
+		"pkg/CAI_type.txt":                               "templates/tgc_next/tfplan2cai/CAI_type.go.tmpl",
+		"pkg/resource_without_cai.txt":                   "templates/tgc_next/tfplan2cai/resource_without_cai.go.tmpl",
 
 		// services
 		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
@@ -334,10 +338,6 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				continue
 			}
 
-			if !object.IncludeInTGCNext {
-				continue
-			}
-
 			tgc.ResourceCount++
 
 			resourceIdentifier := ResourceIdentifier{
@@ -346,6 +346,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
 				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
+				CaiAssetType:       object.CaiAssetType(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 

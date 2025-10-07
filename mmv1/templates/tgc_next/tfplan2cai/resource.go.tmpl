@@ -1,0 +1,5 @@
+{{- range $object := $.ResourcesForVersion }}
+	{{- if $object.ResourceName }}
+{{ $object.TerraformName }}
+	{{- end }}
+{{- end }}

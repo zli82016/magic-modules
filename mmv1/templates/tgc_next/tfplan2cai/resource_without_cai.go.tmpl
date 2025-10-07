@@ -1,0 +1,5 @@
+{{- range $object := $.ResourcesForVersion }}
+	{{- if and $object.ResourceName }}
+{{ $object.TerraformName }}: {{- $object.CaiAssetType }}
+	{{- end }}
+{{- end }}

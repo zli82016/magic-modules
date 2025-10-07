@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -68,7 +69,58 @@ var (
 	setupDone     = false
 )
 
+func readCaiTypes(filePath string) map[string]struct{} {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Fatalf("Error reading file %s: %v", filePath, err)
+	}
+
+	// 2. Unmarshal the JSON data into a slice of strings
+	var list []string
+	err = json.Unmarshal(data, &list)
+	if err != nil {
+		log.Fatalf("Error unmarshaling JSON: %v", err)
+	}
+
+	// 3. Create the "Set" using a map[string]struct{}
+	uniqueSet := make(map[string]struct{})
+
+	// The empty struct struct{} has a size of zero bytes, making it the most
+	// memory-efficient value type for a set.
+	emptyStruct := struct{}{}
+
+	// 4. Populate the set with unique values
+	for _, item := range list {
+		// Adding an element to the map automatically handles uniqueness.
+		uniqueSet[item] = emptyStruct
+	}
+	return uniqueSet
+}
+
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
+	set1 := readCaiTypes("resource_cai.json")
+	set2 := readCaiTypes("cai_assets.json")
+	unique := make([]string, 0)
+	not_supported := make([]string, 0)
+
+	for t := range set1 {
+		parts := strings.Split(t, ":")
+		if len(parts) < 2 {
+			not_supported = append(not_supported, t)
+
+			continue
+		}
+		ct := parts[1]
+		if _, ok := set2[ct]; ok {
+			unique = append(unique, t)
+		} else {
+			not_supported = append(not_supported, t)
+		}
+	}
+
+	writeJSONFile("../../resources_supported_cai.json", unique)
+	writeJSONFile("../../resources_not_supported_cai.json", not_supported)
+
 	if !setupDone {
 		// bucketName := "cai_assets_metadata"
 		bucketName := "cai_assets" // Use the bucket in testing project for tansition
