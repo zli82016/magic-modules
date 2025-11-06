@@ -107,6 +107,13 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 		tgc.addTestsFromSamples(&object)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
+
+	// if iam_policy is not defined or excluded, don't generate it
+	if object.IamPolicy == nil || object.IamPolicy.Exclude || !generateCode || object.IamPolicy.ExcludeTgc {
+		return
+	}
+
+	tgc.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -125,6 +132,32 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+}
+
+// Generate the IAM policy for this object. This is used to query and test
+// IAM policies separately from the resource itself
+func (tgc TerraformGoogleConversionNext) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "pkg/services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	name := object.FilenameOverride
+	if name == "" {
+		name = google.Underscore(object.Name)
+	}
+
+	converters := []string{"tfplan2cai", "cai2hcl"}
+	for _, converter := range converters {
+		templatePath := fmt.Sprintf("templates/tgc_next/%s/iam_resource_converter.go.tmpl", converter)
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_%s_%s.go", productName, google.Underscore(object.Name), converter))
+		templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	}
+
+	templatePath := "templates/terraform/iam_policy.go.tmpl"
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_%s.go", productName, name))
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
