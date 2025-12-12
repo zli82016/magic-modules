@@ -1798,38 +1798,33 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
-func (r Resource) IamImportFormatTemplate() string {
+func (r Resource) IamImportFormat() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
 		importFormat = r.IamPolicy.ImportFormat[0]
 	} else {
 		importFormat = r.IamPolicy.SelfLink
 		if importFormat == "" {
-			if len(r.ImportFormat) > 0 {
-				importFormat = r.ImportFormat[0]
-			} else {
-				importFormat = r.SelfLinkUrl()
-			}
+			importFormat = r.SelfLinkUrl()
 		}
 	}
-	return strings.ReplaceAll(importFormat, "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
-}
-
-func (r Resource) IamImportFormat() string {
-	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
 	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
 }
 
-func (r Resource) IamImportParams() []string {
-	importFormat := r.IamImportFormatTemplate()
-
-	return r.ExtractIdentifiers(importFormat)
-}
-
 func (r Resource) IamImportQualifiersForTest() string {
-	params := r.IamImportParams()
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	params := r.ExtractIdentifiers(importFormat)
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {
