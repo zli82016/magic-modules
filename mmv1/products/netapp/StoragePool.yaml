@@ -68,6 +68,8 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'Storage_pool_create'
     primary_resource_id: 'test_pool'

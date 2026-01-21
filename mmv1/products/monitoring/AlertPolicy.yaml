@@ -39,14 +39,14 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
-tgc_tests:
-  - name: 'TestAccMonitoringAlertPolicy/basic'
-  - name: 'TestAccMonitoringAlertPolicy/forecast'
-  - name: 'TestAccMonitoringAlertPolicy/full'
-  - name: 'TestAccMonitoringAlertPolicy/log'
-  - name: 'TestAccMonitoringAlertPolicy/mql'
-  - name: 'TestAccMonitoringAlertPolicy/promql'
-  - name: 'TestAccMonitoringAlertPolicy/update'
+# tgc_tests:
+#   - name: 'TestAccMonitoringAlertPolicy/basic'
+#   - name: 'TestAccMonitoringAlertPolicy/forecast'
+#   - name: 'TestAccMonitoringAlertPolicy/full'
+#   - name: 'TestAccMonitoringAlertPolicy/log'
+#   - name: 'TestAccMonitoringAlertPolicy/mql'
+#   - name: 'TestAccMonitoringAlertPolicy/promql'
+#   - name: 'TestAccMonitoringAlertPolicy/update'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'

@@ -47,6 +47,8 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'netapp_backup_policy_full'
     primary_resource_id: 'test_backup_policy_full'
