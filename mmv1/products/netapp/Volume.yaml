@@ -50,6 +50,8 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
   pre_update: 'templates/terraform/pre_update/netapp_volume_update.go.tmpl'
   constants: 'templates/terraform/constants/netapp_volume.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'
@@ -339,6 +341,7 @@ properties:
     type: Array
     description: |
       List of actions that are restricted on this volume.
+    is_missing_in_cai: true
     item_type:
       type: Enum
       description: |
