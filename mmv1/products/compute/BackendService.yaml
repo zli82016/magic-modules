@@ -723,7 +723,7 @@ properties:
           - 'cdn_policy.0.cache_key_policy'
           - 'cdn_policy.0.signed_url_cache_max_age_sec'
         default_value: 3600
-        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_backend_service_signed_url_cache_max_age_sec.go.tmpl'
+        # custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_backend_service_signed_url_cache_max_age_sec.go.tmpl'
       - name: 'defaultTtl'
         type: Integer
         description: |
