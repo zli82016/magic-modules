@@ -320,14 +320,14 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	return resource
 }
 
-func (l *Loader) AddExtraFields() error {
+func (l *Loader) AddExtraFields(providerName string) error {
 	if l.Products == nil {
 		return errors.New("products have not been loaded into memory")
 	}
 
 	for _, product := range l.Products {
 		for _, resource := range product.Objects {
-			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil, providerName)
 			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 			resource.SetDefault(product)
 		}

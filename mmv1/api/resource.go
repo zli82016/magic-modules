@@ -906,21 +906,25 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 
 // AddExtraFields processes properties and adds supplementary fields based on property types.
 // It handles write-only properties, labels, and annotations.
-func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
+func (r *Resource) AddExtraFields(props []*Type, parent *Type, providerName string) []*Type {
 	if !r.constraintGroupsInitialized {
 		r.initializeConstraintGroups()
 	}
 
 	for _, p := range props {
-		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
-			props = r.addWriteOnlyFields(props, p)
+		// Don't add write only fields to tgc, as write only fields don't exist in tfplan json,
+		// the input of tfplan2cai.
+		if !strings.HasPrefix(providerName, "tgc") {
+			if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
+				props = r.addWriteOnlyFields(props, p)
+			}
 		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddExtraFields(p.AllProperties(), p)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p, providerName)
 		}
 	}
 	return props
