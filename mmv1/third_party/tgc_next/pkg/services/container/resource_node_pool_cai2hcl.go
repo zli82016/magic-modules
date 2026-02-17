@@ -119,7 +119,13 @@ func flattenNodePoolUpgradeSettings(us *container.UpgradeSettings) []map[string]
 	upgradeSettings["max_surge"] = us.MaxSurge
 	upgradeSettings["max_unavailable"] = us.MaxUnavailable
 
-	upgradeSettings["strategy"] = us.Strategy
+	if us.Strategy != "SURGE" {
+		upgradeSettings["strategy"] = us.Strategy
+	}
+
+	if len(upgradeSettings) == 0 {
+		return nil
+	}
 	return []map[string]interface{}{upgradeSettings}
 }
 
@@ -210,11 +216,15 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np *conta
 	}
 
 	if np.Management != nil {
-		nodePool["management"] = []map[string]interface{}{
-			{
-				"auto_repair":  np.Management.AutoRepair,
-				"auto_upgrade": np.Management.AutoUpgrade,
-			},
+		management := make(map[string]interface{})
+		if !np.Management.AutoRepair {
+			management["auto_repair"] = np.Management.AutoRepair
+		}
+		if !np.Management.AutoUpgrade {
+			management["auto_upgrade"] = np.Management.AutoUpgrade
+		}
+		if len(management) > 0 {
+			nodePool["management"] = []map[string]interface{}{management}
 		}
 	}
 

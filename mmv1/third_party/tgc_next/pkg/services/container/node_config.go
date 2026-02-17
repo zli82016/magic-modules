@@ -1579,13 +1579,22 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 			EnableSecureBoot:          conf["enable_secure_boot"].(bool),
 			EnableIntegrityMonitoring: conf["enable_integrity_monitoring"].(bool),
 		}
+
+		// suppress defaults
+		if !nc.ShieldedInstanceConfig.EnableSecureBoot && nc.ShieldedInstanceConfig.EnableIntegrityMonitoring {
+			nc.ShieldedInstanceConfig = nil
+		}
 	}
 
 	// Preemptible Is Optional+Default, so it always has a value
-	nc.Preemptible = nodeConfig["preemptible"].(bool)
+	if v, ok := nodeConfig["preemptible"]; ok {
+		nc.Preemptible = v.(bool)
+	}
 
 	// Spot Is Optional+Default, so it always has a value
-	nc.Spot = nodeConfig["spot"].(bool)
+	if v, ok := nodeConfig["spot"]; ok {
+		nc.Spot = v.(bool)
+	}
 
 	if v, ok := nodeConfig["min_cpu_platform"]; ok {
 		nc.MinCpuPlatform = v.(string)
