@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"reflect"
 	"strings"
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
@@ -44,7 +45,10 @@ func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields m
 				}
 
 				endAssetIx := getEndAssetIx(endTemplateIx, templateFragments, assetFragments)
-
+				if endAssetIx < assetIx {
+					log.Printf("Warning: endAssetIx %d is less than assetIx %d. AssetName: %s, Template: %s", endAssetIx, assetIx, assetName, template)
+					return
+				}
 				valueFragments := assetFragments[assetIx:endAssetIx]
 				value := strings.Join(valueFragments, "/")
 
@@ -154,6 +158,14 @@ func normalizeFlattenedObj(obj interface{}, schemaPerProp map[string]*schema.Sch
 		for property, propertySchema := range schemaPerProp {
 			propertyValue := objMap[property]
 
+			// For optional string fields, if the value is an empty string, we should omit it.
+			// This allows us to support required empty strings (e.g. secondary_boot_disks.disk_image).
+			if propertySchema.Type == schema.TypeString && propertySchema.Optional {
+				if s, ok := propertyValue.(string); ok && s == "" {
+					continue
+				}
+			}
+
 			switch propertySchema.Elem.(type) {
 			case *schema.Resource:
 				objMapNew[property] = normalizeFlattenedObj(propertyValue, propertySchema.Elem.(*schema.Resource).Schema)
@@ -173,6 +185,16 @@ func normalizeFlattenedObj(obj interface{}, schemaPerProp map[string]*schema.Sch
 
 		return arrNew
 	default:
+		// Handle other slice types via reflection (e.g. []map[string]interface{})
+		val := reflect.ValueOf(obj)
+		if val.Kind() == reflect.Slice {
+			length := val.Len()
+			arrNew := make([]interface{}, length)
+			for i := 0; i < length; i++ {
+				arrNew[i] = normalizeFlattenedObj(val.Index(i).Interface(), schemaPerProp)
+			}
+			return arrNew
+		}
 		return obj
 	}
 }

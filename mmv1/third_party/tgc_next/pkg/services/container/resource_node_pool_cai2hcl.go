@@ -56,12 +56,18 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 	}
 	d := fakeResource.TestResourceData()
 
+	PreprocessNodePoolData(asset.Resource.Data)
+
 	var nodePool *container.NodePool
 	if err := utils.DecodeJSON(asset.Resource.Data, &nodePool); err != nil {
 		return nil, err
 	}
 
 	hclData := make(map[string]interface{})
+
+	outputFields := map[string]struct{}{}
+	an := strings.Replace(asset.Name, "/zones/", "/locations/", 1)
+	utils.ParseUrlParamValuesFromAssetName(an, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}", outputFields, hclData)
 
 	npMap, err := flattenNodePool(d, config, nodePool, "")
 	if err != nil {
@@ -117,7 +123,9 @@ func flattenNodePoolUpgradeSettings(us *container.UpgradeSettings) []map[string]
 
 	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(us.BlueGreenSettings)
 	upgradeSettings["max_surge"] = us.MaxSurge
-	upgradeSettings["max_unavailable"] = us.MaxUnavailable
+	if us.MaxUnavailable > 0 {
+		upgradeSettings["max_unavailable"] = us.MaxUnavailable
+	}
 
 	upgradeSettings["strategy"] = us.Strategy
 	return []map[string]interface{}{upgradeSettings}
@@ -161,14 +169,20 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np *conta
 	nodePool := map[string]interface{}{
 		"name":                        np.Name,
 		"name_prefix":                 d.Get(prefix + "name_prefix"),
-		"initial_node_count":          np.InitialNodeCount,
 		"node_locations":              schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(np.Locations)),
-		"node_count":                  nodeCount,
 		"node_config":                 flattenNodeConfig(np.Config, d.Get(prefix+"node_config")),
 		"instance_group_urls":         igmUrls,
 		"managed_instance_group_urls": managedIgmUrls,
 		"version":                     np.Version,
 		"network_config":              flattenNodeNetworkConfig(np.NetworkConfig, d, prefix),
+	}
+
+	if np.InitialNodeCount > 0 {
+		nodePool["initial_node_count"] = np.InitialNodeCount
+	}
+
+	if nodeCount > 0 {
+		nodePool["node_count"] = nodeCount
 	}
 
 	if np.Autoscaling != nil {
@@ -234,18 +248,20 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np *conta
 func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.ResourceData, prefix string) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
-		result = append(result, map[string]interface{}{
+		nodeNetworkConfig := map[string]interface{}{
 			// TODO: investigate why create_pod_range is not returned by the API
 			// "create_pod_range": d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
 			"pod_ipv4_cidr_block":             c.PodIpv4CidrBlock,
 			"pod_range":                       c.PodRange,
-			"enable_private_nodes":            c.EnablePrivateNodes,
 			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
 			"network_performance_config":      flattenNodeNetworkPerformanceConfig(c.NetworkPerformanceConfig),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
-			"subnetwork":                      c.Subnetwork,
-		})
+		}
+		if c.EnablePrivateNodes {
+			nodeNetworkConfig["enable_private_nodes"] = c.EnablePrivateNodes
+		}
+		result = append(result, nodeNetworkConfig)
 	}
 	return result
 }
@@ -289,4 +305,24 @@ func flattenAdditionalPodNetworkConfig(c []*container.AdditionalPodNetworkConfig
 		})
 	}
 	return result
+}
+
+// PreprocessNodePoolData processes the node pool data before decoding.
+// It sets default values for missing fields and removes unsupported strategies.
+func PreprocessNodePoolData(data map[string]interface{}) {
+	// Default cpuCfsQuota to true if missing in CAI asset (unspecified = true in Terraform/GKE, but default false in Go bool)
+	if config, ok := data["config"].(map[string]interface{}); ok {
+		if kubeletConfig, ok := config["kubeletConfig"].(map[string]interface{}); ok {
+			if _, exists := kubeletConfig["cpuCfsQuota"]; !exists {
+				kubeletConfig["cpuCfsQuota"] = true
+			}
+		}
+	}
+
+	// "SHORT_LIVED" strategy is not supported by the Terraform provider yet.
+	if upgradeSettings, ok := data["upgradeSettings"].(map[string]interface{}); ok {
+		if strategy, ok := upgradeSettings["strategy"].(string); ok && strategy == "SHORT_LIVED" {
+			delete(upgradeSettings, "strategy")
+		}
+	}
 }

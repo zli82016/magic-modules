@@ -1618,34 +1618,6 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
-
-		// // start cpu_cfs_quota fix https://github.com/hashicorp/terraform-provider-google/issues/15767
-		// // this makes the field conditional on appearance in configuration. This allows the API `true` default
-		// // to override null, where currently we force-send null as false, which is wrong.
-		// rawConfigNPRoot := d.GetRawConfig()
-		// // if we have a prefix, we're in `node_pool.N.` in GKE Cluster. Traverse the RawConfig object to reach that
-		// // root, at which point local references work going forwards.
-		// if prefix != "" {
-		// 	parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
-		// 	npIndex, err := strconv.Atoi(parts[1])
-		// 	if err != nil { // no error return from expander
-		// 		panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
-		// 	}
-
-		// 	rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
-		// }
-
-		// if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-		// 	if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-		// 		v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
-		// 		if v == cty.NullVal(cty.Bool) {
-		// 			nc.KubeletConfig.CpuCfsQuota = true
-		// 		} else if v.False() { // force-send explicit false to API
-		// 			nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
-		// 		}
-		// 	}
-		// }
-		// end cpu_cfs_quota fix
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -2377,24 +2349,13 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		return config
 	}
 
-	// default to no prior taint state if there are any issues
-	oldTaints := []interface{}{}
-	oldNodeConfigSchemaContainer := v.([]interface{})
-	if len(oldNodeConfigSchemaContainer) != 0 {
-		oldNodeConfigSchema := oldNodeConfigSchemaContainer[0].(map[string]interface{})
-		if vt, ok := oldNodeConfigSchema["taint"]; ok && len(vt.([]interface{})) > 0 {
-			oldTaints = vt.([]interface{})
-		}
-	}
-
-	config = append(config, map[string]interface{}{
+	nodeConfig := map[string]interface{}{
 		"machine_type":                       c.MachineType,
 		"containerd_config":                  flattenContainerdConfig(c.ContainerdConfig),
 		"disk_size_gb":                       c.DiskSizeGb,
 		"disk_type":                          c.DiskType,
 		"boot_disk":                          flattenBootDiskConfig(c.BootDisk),
 		"guest_accelerator":                  flattenContainerGuestAccelerators(c.Accelerators),
-		"local_ssd_count":                    c.LocalSsdCount,
 		"logging_variant":                    flattenLoggingVariant(c.LoggingConfig),
 		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
 		"gcfs_config":                        flattenGcfsConfig(c.GcfsConfig),
@@ -2407,14 +2368,12 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"labels":                             c.Labels,
 		"resource_labels":                    c.ResourceLabels,
 		"tags":                               c.Tags,
-		"preemptible":                        c.Preemptible,
+
 		"secondary_boot_disks":               flattenSecondaryBootDisks(c.SecondaryBootDisks),
 		"storage_pools":                      c.StoragePools,
-		"spot":                               c.Spot,
 		"min_cpu_platform":                   c.MinCpuPlatform,
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
-		"taint":                              flattenTaints(c.Taints, oldTaints),
-		"effective_taints":                   flattenEffectiveTaints(c.Taints),
+		"taint":                              flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 		"confidential_nodes":                 flattenConfidentialNodes(c.ConfidentialNodes),
 		"boot_disk_kms_key":                  c.BootDiskKmsKey,
@@ -2424,13 +2383,30 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"node_group":                         c.NodeGroup,
 		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"max_run_duration":                   c.MaxRunDuration,
-		"flex_start":                         c.FlexStart,
 		"sole_tenant_config":                 flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":                        flattenFastSocket(c.FastSocket),
 		"resource_manager_tags":              flattenResourceManagerTags(c.ResourceManagerTags),
-		"enable_confidential_storage":        c.EnableConfidentialStorage,
 		"local_ssd_encryption_mode":          c.LocalSsdEncryptionMode,
-	})
+	}
+
+	if c.LocalSsdCount > 0 {
+		nodeConfig["local_ssd_count"] = c.LocalSsdCount
+	}
+	if c.Preemptible {
+		nodeConfig["preemptible"] = c.Preemptible
+	}
+	if c.Spot {
+		nodeConfig["spot"] = c.Spot
+	}
+
+	if c.FlexStart {
+		nodeConfig["flex_start"] = c.FlexStart
+	}
+	if c.EnableConfidentialStorage {
+		nodeConfig["enable_confidential_storage"] = c.EnableConfidentialStorage
+	}
+
+	config = append(config, nodeConfig)
 
 	if len(c.OauthScopes) > 0 {
 		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(c.OauthScopes))
@@ -2446,12 +2422,20 @@ func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
 		return config
 	}
 
-	config = append(config, map[string]interface{}{
-		"disk_type":              c.DiskType,
-		"size_gb":                c.SizeGb,
-		"provisioned_iops":       c.ProvisionedIops,
-		"provisioned_throughput": c.ProvisionedThroughput,
-	})
+	disk := map[string]interface{}{
+		"disk_type": c.DiskType,
+		"size_gb":   c.SizeGb,
+	}
+
+	if c.ProvisionedIops > 0 {
+		disk["provisioned_iops"] = c.ProvisionedIops
+	}
+
+	if c.ProvisionedThroughput > 0 {
+		disk["provisioned_throughput"] = c.ProvisionedThroughput
+	}
+
+	config = append(config, disk)
 
 	return config
 }
@@ -2549,6 +2533,9 @@ func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]in
 			secondaryBootDisk := map[string]interface{}{
 				"disk_image": disk.DiskImage,
 				"mode":       disk.Mode,
+			}
+			if disk.DiskImage == "" { // required field
+				secondaryBootDisk["disk_image"] = ""
 			}
 			result = append(result, secondaryBootDisk)
 		}
@@ -2723,21 +2710,34 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"memory_manager":                         flattenMemoryManager(c.MemoryManager),
 			"topology_manager":                       flattenTopologyManager(c.TopologyManager),
 			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
-			"pod_pids_limit":                         c.PodPidsLimit,
 			"container_log_max_size":                 c.ContainerLogMaxSize,
-			"container_log_max_files":                c.ContainerLogMaxFiles,
-			"image_gc_low_threshold_percent":         c.ImageGcLowThresholdPercent,
-			"image_gc_high_threshold_percent":        c.ImageGcHighThresholdPercent,
 			"image_minimum_gc_age":                   c.ImageMinimumGcAge,
 			"image_maximum_gc_age":                   c.ImageMaximumGcAge,
 			"allowed_unsafe_sysctls":                 c.AllowedUnsafeSysctls,
-			"single_process_oom_kill":                c.SingleProcessOomKill,
 			"max_parallel_image_pulls":               c.MaxParallelImagePulls,
-			"eviction_max_pod_grace_period_seconds":  c.EvictionMaxPodGracePeriodSeconds,
 			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
 			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
 			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
 		})
+
+		if c.PodPidsLimit > 0 {
+			result[0]["pod_pids_limit"] = c.PodPidsLimit
+		}
+		if c.ContainerLogMaxFiles > 0 {
+			result[0]["container_log_max_files"] = c.ContainerLogMaxFiles
+		}
+		if c.ImageGcLowThresholdPercent > 0 {
+			result[0]["image_gc_low_threshold_percent"] = c.ImageGcLowThresholdPercent
+		}
+		if c.ImageGcHighThresholdPercent > 0 {
+			result[0]["image_gc_high_threshold_percent"] = c.ImageGcHighThresholdPercent
+		}
+		if c.SingleProcessOomKill {
+			result[0]["single_process_oom_kill"] = c.SingleProcessOomKill
+		}
+		if c.EvictionMaxPodGracePeriodSeconds > 0 {
+			result[0]["eviction_max_pod_grace_period_seconds"] = c.EvictionMaxPodGracePeriodSeconds
+		}
 	}
 	return result
 }
