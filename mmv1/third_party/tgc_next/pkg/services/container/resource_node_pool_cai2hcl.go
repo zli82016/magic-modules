@@ -120,7 +120,6 @@ func flattenNodePoolUpgradeSettings(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	upgradeSettings := make(map[string]interface{})
-
 	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(us["blueGreenSettings"])
 	upgradeSettings["max_surge"] = us["maxSurge"]
 	upgradeSettings["max_unavailable"] = us["maxUnavailable"]
@@ -143,7 +142,6 @@ func flattenNodePoolNodeDrainConfig(v interface{}) []map[string]interface{} {
 	}
 	nodeDrainConfig := make(map[string]interface{})
 	nodeDrainConfig["respect_pdb_during_node_pool_deletion"] = ndc["respectPdbDuringNodePoolDeletion"]
-
 	return []map[string]interface{}{nodeDrainConfig}
 }
 

@@ -25,6 +25,11 @@ func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport.
 	if err != nil {
 		return []caiasset.Asset{}, err
 	}
+
+	if v, ok := d.GetOk("location"); ok && tpgresource.IsZone(v.(string)) {
+		name = strings.Replace(name, "/locations/", "/zones/", 1)
+	}
+
 	if data, err := GetContainerClusterData(d, config); err == nil {
 		location, _ := tpgresource.GetLocation(d, config)
 		return []caiasset.Asset{

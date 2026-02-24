@@ -76,25 +76,14 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 					return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 				}
 
-				// If the primary resource is specified, only test the primary resource.
-				// Otherwise, test all of the resources in the test.
-				primaryResource := testData.PrimaryResource
 				resourceTestData := testData.ResourceTestData
-				if primaryResource != "" {
-					t.Logf("%s: Test for the primary resource %s begins.", tName, primaryResource)
-					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
+				for address, testData := range resourceTestData {
+					if !strings.HasPrefix(address, primaryResourceType) {
+						continue
+					}
+					err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 					if err != nil {
 						return err
-					}
-				} else {
-					for address, testData := range resourceTestData {
-						if !strings.HasPrefix(address, primaryResourceType) {
-							continue
-						}
-						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
-						if err != nil {
-							return err
-						}
 					}
 				}
 
