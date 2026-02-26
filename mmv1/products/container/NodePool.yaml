@@ -20,3 +20,19 @@ properties:
   - name: 'name'
     type: 'String'
     description: 'The name of the node pool.'
+  - name: 'nodeCount'
+    type: 'Integer'
+    description: 'The initial node count for the pool.'
+    ignore_read: true
+  - name: 'NamePrefix'
+    type: 'String'
+    description: 'The prefix of the node pool name.'
+    ignore_read: true
+  - name: 'networkConfig'
+    type: 'NestedObject'
+    description: 'Networking configuration for this NodePool.'
+    properties:
+      - name: 'createPodRange'
+        type: 'Boolean'
+        description: 'Whether to create a new range for pod IPs in this node pool.'
+        ignore_read: true
