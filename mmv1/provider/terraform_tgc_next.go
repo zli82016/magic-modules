@@ -104,12 +104,13 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-		tgc.addTestsFromSamples(&object)
-		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-			log.Printf("Error adding examples from handwritten tests: %v", err)
-		}
-		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
+	tgc.addTestsFromSamples(&object)
+	if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+		log.Printf("Error adding examples from handwritten tests: %v", err)
+	}
+
+	tgc.GenerateResourceTests(object, *templateData, outputFolder)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
