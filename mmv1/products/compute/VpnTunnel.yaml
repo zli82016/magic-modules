@@ -13,6 +13,7 @@
 
 ---
 name: VpnTunnel
+include_in_tgc_next: true
 description: VPN tunnel resource.
 references:
   guides:
@@ -29,6 +30,7 @@ async:
   operation:
     base_url: '{{op_id}}'
 custom_code:
+  # tgc_ignore_terraform_encoder: true
   encoder: templates/terraform/encoders/vpn_tunnel.go.tmpl
   constants: templates/terraform/constants/vpn_tunnel.tmpl
   post_create: templates/terraform/post_create/labels.tmpl
@@ -274,6 +276,11 @@ properties:
               type: String
           - name: pfs
             type: Array
+            is_missing_in_cai: true
             description: Perfect forward secrecy groups.
             item_type:
               type: String
+
+tgc_tests:
+  - name: "TestAccComputeVpnTunnel_routerWithSharedSecretWo_update"
+    skip: "Because of reverting WriteOnlyConfigured, CAI doesn't export the generated _wo field"

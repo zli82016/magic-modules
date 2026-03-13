@@ -528,19 +528,40 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 			if len(rid.ImportFormats) > 0 {
 				segmentsList[i] = processPathIntoSegments(rid.ImportFormats[0])
 			} else {
-				// If no import format, fallback to previous empty list or keep as is?
-				// For now let's assume if we are falling back, we want fresh segments.
-				segmentsList[i] = []string{}
+				segmentsList[i] = processPathIntoSegments(rid.CaiAssetNameFormat)
 			}
 		}
 
 		segmentsList = removeSharedElements(segmentsList)
 
 		for i, segments := range segmentsList {
-			if len(segments) == 0 {
-				rids[i].IdentityParam = ""
+			uniqueSegment := ""
+			for _, seg := range segments {
+				isUnique := true
+				for j, otherSegments := range segmentsList {
+					if i == j {
+						continue
+					}
+					for _, otherSeg := range otherSegments {
+						if seg == otherSeg {
+							isUnique = false
+							break
+						}
+					}
+					if !isUnique {
+						break
+					}
+				}
+				if isUnique {
+					uniqueSegment = seg
+					break
+				}
+			}
+
+			if uniqueSegment != "" {
+				rids[i].IdentityParam = uniqueSegment
 			} else {
-				rids[i].IdentityParam = segments[0]
+				rids[i].IdentityParam = ""
 			}
 		}
 	}
