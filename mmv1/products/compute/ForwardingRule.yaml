@@ -681,6 +681,7 @@ properties:
       - 'IPV6'
   - name: ipCollection
     type: String
+    is_missing_in_cai: true
     diff_suppress_func: 'IpCollectionDiffSuppress'
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
