@@ -1,0 +1,35 @@
+---
+name: 'Project'
+legacy_name: 'project'
+kind: 'resourcemanager#project'
+description: 'A cloud project.'
+exclude_resource: true
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccProject_create'
+  - name: 'TestAccProject_createWithoutOrg'
+  - name: 'TestAccProject_billing'
+  - name: 'TestAccProject_labels'
+  - name: 'TestAccProject_deleteDefaultNetwork'
+  - name: 'TestAccProject_parentFolder'
+  - name: 'TestAccProject_migrateParent'
+  - name: 'TestAccProject_tags'
+  - name: 'TestAccProject_noAllowDestroy'
+  - name: 'TestAccProject_abandon'
+properties:
+  - name: 'projectId'
+    type: String
+    description: 'The unique, user-assigned ID of the Project.'
+virtual_fields:
+  - name: 'deletion_policy'
+    type: String
+  - name: 'billing_account'
+    type: String
+  - name: 'skip_delete'
+    type: Boolean
+  - name: 'auto_create_network'
+    type: Boolean
+  - name: 'folder_id'
+    type: String
+  - name: 'org_id'
+    type: String
