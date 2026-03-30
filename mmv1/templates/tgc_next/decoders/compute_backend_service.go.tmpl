@@ -23,7 +23,27 @@ if v, ok := res["backends"]; ok {
 					mu := vMu.(float64)
 					cm["maxUtilization"] = fmt.Sprintf("%.1f", mu)
 				}
+				// The GCP API/CAI drops dryRun when its value is false (zero-value dropping).
+				// We explicitly set it to false here so that the cai2hcl flattener can read it and
+				// generate valid HCL, satisfying the required Terraform schema field without
+				// needing ignore_read_extra in YAML.
+				if _, ok := cm["dryRun"]; !ok {
+					cm["dryRun"] = false
+				}
 			}
+		}
+	}
+}
+
+if v, ok := res["customMetrics"]; ok {
+	cms := v.([]interface{})
+	for _, vCm := range cms {
+		cm := vCm.(map[string]interface{})
+		// The GCP API/CAI drops dryRun when its value is false (zero-value dropping).
+		// We explicitly set it to false here so that the cai2hcl flattener can read it and
+		// generate valid HCL for top-level customMetrics.
+		if _, ok := cm["dryRun"]; !ok {
+			cm["dryRun"] = false
 		}
 	}
 }
