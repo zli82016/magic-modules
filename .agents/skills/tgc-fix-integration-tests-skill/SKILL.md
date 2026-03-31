@@ -155,8 +155,8 @@ These tests check the accuracy of the conversions between Cloud Asset Inventory 
   - **Example**: `TestAccComputeBackendBucket_backendBucketSecurityPolicyExample_step1: missing fields in resource google_compute_backend_bucket.image_backend after cai2hcl conversion: [edge_security_policy]`
 - **Cause**: The field is part of the Terraform provider's schema but is not included in the asset data provided by Cloud Asset Inventory.
 - **Debug**: Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, it is not being provided in the CAI asset data.
-- **Solution**: Mark the field with `is_missing_in_cai: true` in the resource YAML file. This informs TGC that the field is not expected to be in the CAI input.
-- **Example**: `is_missing_in_cai: true` in the field `edgeSecurityPolicy` in `BackendBucket.yaml`.
+- **Solution**: Mark the field with `is_missing_in_cai: true` in the resource YAML file. This informs TGC that the field is not expected to be in the CAI input. Only add `is_missing_in_cai: true` if the field is missing in **ALL** of the resource's CAI asset JSON files. If the field exists in some CAI files but is missing in others, do not use this flag.
+- **Example**: `is_missing_in_cai: true` for the field `edgeSecurityPolicy` in `BackendBucket.yaml`.
 
 #### 9. Incorrect CAI Asset Name Format
 - **Symptom**: Error message like `A required argument (e.g., "folder") is missing in the generated HCL.`
