@@ -24,3 +24,5 @@ make test-local TEST=./pkg/... TESTARGS='-run=TestConvert_iamBinding'
    - **don't** add ignore_read_extra to example in Resource.yaml
    - **don't** add new fields to mmv1/api/resource/custom_code.go unless it is guided by the user
    - **don't** remove any existing custom_code, including any constants
+
+4. When running `make tgc` or related generators in magic-modules, always use an explicit `OUTPUT_PATH` specify the downstream repository (e.g., `OUTPUT_PATH=/Users/zhenhuali/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion`). This prevents the system from defaulting to root `/tfplan2cai`.
