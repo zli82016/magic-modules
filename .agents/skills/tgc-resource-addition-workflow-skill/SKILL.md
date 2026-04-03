@@ -66,7 +66,7 @@ When starting to add or fix a resource, copy this template into your `task.md` f
 - [ ] Step 4: Run Integration Tests (with WRITE_FILES=true) <!-- id: 4 -->
   - [ ] Verify generated tests exist in `test/services/<service>/` <!-- id: 7 -->
   - [ ] Verify the added resource has CAI asset data in `tests_metadata_*.json` files in the `test` directory <!-- id: 8 -->
-  - [ ] Verify all tests for the added resource in `tests_metadata_*.json` are present in the generated test file <!-- id: 9 -->
+  - [ ] Verify all tests for the added resource in `tests_metadata_*.json` are present in the generated test file (refer to Case 11 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing) <!-- id: 9 -->
 - [ ] Step 5: Fix failures & restart from Step 2 <!-- id: 5 -->
 - [ ] Step 6: Commit changes after green tests <!-- id: 6 -->
 ```
