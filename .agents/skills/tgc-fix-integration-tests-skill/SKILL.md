@@ -26,6 +26,7 @@ When troubleshooting and resolving test failures, adhere to these constraints:
 - **DON'T** remove any existing `custom_code`, including any constants.
 - **DO** add a comment for each fix in the YAML file or other files to explain the root cause and the solution.
 - **DON'T** use `d.Set` in custom decoders for `cai2hcl`. Conversion in `cai2hcl` is a direct mapping from CAI asset data maps to HCL maps without involving Terraform state. Mutate the data map directly.
+- **DON'T** use `is_missing_in_cai: true` if the missing fields are present in other raw JSON files of other tests.
 
 ---
 
