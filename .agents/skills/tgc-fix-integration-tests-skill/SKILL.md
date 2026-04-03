@@ -25,6 +25,7 @@ When troubleshooting and resolving test failures, adhere to these constraints:
 - **DON'T** add new fields to `mmv1/api/resource/custom_code.go` unless explicitly guided by the user.
 - **DON'T** remove any existing `custom_code`, including any constants.
 - **DO** add a comment for each fix in the YAML file or other files to explain the root cause and the solution.
+- **DON'T** use `d.Set` in custom decoders for `cai2hcl`. Conversion in `cai2hcl` is a direct mapping from CAI asset data maps to HCL maps without involving Terraform state. Mutate the data map directly.
 
 ---
 
@@ -104,6 +105,13 @@ These tests check the accuracy of the conversions between Cloud Asset Inventory 
   - **Error message**: `"self_managed": one of managed,self_managed must be specified`
   - **Debug**: Field `selfManaged` is empty in the CAI asset data in `TestAccCertificateManagerCertificate_certificateManagerSelfManagedCertificateExample_step1.json`. The field `self_managed` is missing in the converted HCL after `cai2hcl` conversion. The top-level `pemCertificate` exists in the CAI asset data in the JSON file and can be used for `selfManaged.pemCertificate` instead.
   - **Solution**: Add `tgc_decoder` to the resource's YAML file `Certificate.yaml`. Create the `.go.tmpl` file `mmv1/templates/tgc_next/decoders/iam_workload_identity_pool_provider.go.tmpl`. Implement logic to set `pemCertificate` to the top-level `pemCertificate` (as it is missing in the CAI asset block) and set `pemPrivateKey` to `"unknown"`.
+
+- **Example 3**:
+  - **Failing test**: `TestAccDatabaseMigrationServiceConnectionProfile_databaseMigrationServiceConnectionProfileCloudsqlExample`
+  - **Error message**: `"host": required field is not set` (triggered by `required_with` constraints).
+  - **Debug**: CAI asset does not provide `host`, `username`, `port`, or `password` when using `cloudSqlId` or `alloydbClusterId`. But Terraform schema requires them due to `required_with` constraints if any of them are set (or if we attempt to provide dummy values for some of them!).
+  - **Solution**: Add `tgc_decoder` to the resource's YAML file. Implement CONDITIONAL logic to set missing required fields to `"unknown"` (for strings) or `0` (for integers like `port`) ONLY IF related fields like `alloydbClusterId` or `cloudSqlId` are present.
+- **Key Takeaway**: When handling `required_with` constraints in decoders, ensure you provide values for ALL inter-dependent fields, using appropriate types (e.g., `0` for integers).
 
 #### 3. Error Converting Round-Trip Config (HCL -> CAI) - API Calls
 - **Symptom**: Error message like `error when converting the round-trip config: &fmt.wrapError{msg:"tfplan2ai converting: googleapi: Error 404: The resource 'projects/ci-test-project-nightly-ga/zones/us-central1-b/instances/tf-test-jqz6svzykj' was not found..."}`

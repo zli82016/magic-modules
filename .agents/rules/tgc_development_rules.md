@@ -30,3 +30,5 @@ make test-local TEST=./pkg/... TESTARGS='-run=TestConvert_iamBinding'
 5. When running `tgc-run-integration-tests-skill` or manual integration tests, always set `WRITE_FILES=true` to ensure the framework writes out diagnostic fixtures for comparisons.
 
 6. Only commit files under the `mmv1` folder in the branch, and exclude scratch files like `.txt`, `.py`, and `.sh` from commits.
+
+7. DO NOT make changes directly in the downstream repository (`terraform-google-conversion`). All changes must be driven through Magic Modules (`mmv1/`).

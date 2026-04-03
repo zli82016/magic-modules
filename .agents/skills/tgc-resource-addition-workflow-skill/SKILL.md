@@ -45,11 +45,7 @@ export WRITE_FILES=true
 If the integration tests fail, analyze the logs generated in Step 4 and apply the fixes specified in the `tgc-fix-integration-tests-skill` playbook.
 
 **Reference**: `.agents/skills/tgc-fix-integration-tests-skill/SKILL.md`
-
-Common fixes applied here include:
-- Supressing mutually exclusive fields via a custom Go `tgc_decoder`.
-- Adding fields that CAI drops (e.g. default values) to the ignore lists (via `is_missing_in_cai: true` in the YAML).
-- Editing `TGCTestIgnorePropertiesToStrings` in `mmv1/api/resource.go` to ignore entire blocks natively missing from CAI payload arrays (like `dynamic`).
+Refer to the **Troubleshooting Playbook** and **Examples** in that file for common solutions (e.g., handling missing requested fields with decoders).
 
 ### Step 6: Start Over
 After applying any fix in Step 5 (whether in a YAML file, a Go template, or a decoder), you **MUST start over from Step 2**.
@@ -57,3 +53,21 @@ After applying any fix in Step 5 (whether in a YAML file, a Go template, or a de
 2. Proceed to **Step 4 (Run Integration Tests)** to verify if the test now passes.
 
 Repeat this `Build -> Test -> Fix` loop until all integration tests for the resource pass with exit code `0`. Once they pass, commit your changes.
+
+---
+
+## Workflow Checklist Template
+When starting to add or fix a resource, copy this template into your `task.md` file to track progress:
+
+```markdown
+- [ ] Step 1: Add/Modify Resource in MMv1 <!-- id: 1 -->
+- [/] Step 2: Build TGC binary <!-- id: 2 -->
+- [ ] Step 3: Run Unit Tests <!-- id: 3 -->
+- [ ] Step 4: Run Integration Tests (with WRITE_FILES=true) <!-- id: 4 -->
+- [ ] Step 5: Fix failures & restart from Step 2 <!-- id: 5 -->
+- [ ] Step 6: Commit changes after green tests <!-- id: 6 -->
+```
+
+## Critical Rules
+- **DO NOT** run integration tests after a fix without rebuilding the TGC binary first (Step 2).
+- **ALWAYS** set `WRITE_FILES=true` when running integration tests to generate CAI asset data for verification.
