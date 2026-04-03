@@ -28,3 +28,5 @@ make test-local TEST=./pkg/... TESTARGS='-run=TestConvert_iamBinding'
 4. When running `make tgc` or related generators in magic-modules, always use an explicit `OUTPUT_PATH` specify the downstream GoogleCloudPlatform repository (e.g., `OUTPUT_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion`). This prevents the system from defaulting to root `/tfplan2cai`.
 
 5. When running `tgc-run-integration-tests-skill` or manual integration tests, always set `WRITE_FILES=true` to ensure the framework writes out diagnostic fixtures for comparisons.
+
+6. Only commit files under the `mmv1` folder in the branch, and exclude scratch files like `.txt`, `.py`, and `.sh` from commits.
