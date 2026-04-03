@@ -71,7 +71,7 @@ When starting to add or fix a resource, copy this template into your `task.md` f
   - [ ] Verify generated tests exist in `test/services/<service>/` <!-- id: 7 -->
   - [ ] Verify the added resource has CAI asset data in `tests_metadata_*.json` files in the `test` directory <!-- id: 8 -->
   - [ ] Verify if any tests for the added resource in `tests_metadata_*.json` are missing in the generated test file (refer to Case 16 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing due to excluded examples) <!-- id: 9 -->
-  - [ ] Verify that **not all** of the generated tests were skipped or reported "no tests to run" in the output (refer to Case 11 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing)<!-- id: 10 -->
+  - [ ] Verify that **not all** of the generated tests were skipped or reported "no tests to run" in the output (refer to Case 11 or Case 16 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing)<!-- id: 10 -->
 - [ ] Step 5: Fix failures & restart from Step 2 <!-- id: 5 -->
 - [ ] Step 6: Commit changes after green tests <!-- id: 6 -->
 ```
@@ -79,3 +79,5 @@ When starting to add or fix a resource, copy this template into your `task.md` f
 ## Critical Rules
 - **DO NOT** run integration tests after a fix without rebuilding the TGC binary first (Step 2).
 - **ALWAYS** set `WRITE_FILES=true` when running integration tests to generate CAI asset data for verification.
+- **DO NOT** manually modify `tests_metadata_*.json` files in downstream TGC repo. These are read-only assets from GCS.
+- **DO NOT** remove `exclude_test: true` from existing examples in resource YAML files to make integration tests pass. Instead, add a new example or use `tgc_tests` if appropriate.
