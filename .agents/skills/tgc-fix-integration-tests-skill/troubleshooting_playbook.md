@@ -201,3 +201,9 @@ These tests check the accuracy of the conversions between Cloud Asset Inventory 
 - **Symptom**: Functions like `expandToLongForm` or `expandToRegionalLongForm` are reported as undefined during the TGC build.
 - **Cause**: The file defining these shared utilities (e.g., `mmv1/third_party/terraform/services/eventarc/eventarc_utils.go`) is not being compiled into the TGC binary.
 - **Solution**: Add the file to the CopyCommonFiles or CompileCommonFiles list in `mmv1/provider/terraform_tgc_next.go` (or equivalent provider file) to ensure it is included in the build.
+
+#### 16. No Tests Generated Due to Excluded Examples
+- **Symptom**: No integration tests are generated for a resource, leading to messages like "SKIPPED: No tests generated".
+- **Cause**: All examples defined for the resource in the Magic Modules YAML file are marked with `exclude_test: true`.
+- **Solution**: This is expected if the resource cannot be tested automatically in the shared environment. If tests are desired, add a new example that does not have `exclude_test: true` and supports setup/teardown in tests.
+- **Example**: `eventarc/Enrollment` was skipped because its only example was marked with `exclude_test: true`. In this case, verified tests cannot be generated automatically.

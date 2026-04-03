@@ -41,6 +41,10 @@ export WRITE_FILES=true
 .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh <test-path> <test-name>
 ```
 
+**CAUTION**: Verify that **not all** of the tests are skipped (e.g., check for `[no tests to run]` or full `SKIP` in the test output).
+
+
+
 ### Step 5: Fix Integration Tests (If Failed)
 If the integration tests fail, analyze the logs generated in Step 4 and apply the fixes specified in the `tgc-fix-integration-tests-skill` playbook.
 
@@ -66,7 +70,8 @@ When starting to add or fix a resource, copy this template into your `task.md` f
 - [ ] Step 4: Run Integration Tests (with WRITE_FILES=true) <!-- id: 4 -->
   - [ ] Verify generated tests exist in `test/services/<service>/` <!-- id: 7 -->
   - [ ] Verify the added resource has CAI asset data in `tests_metadata_*.json` files in the `test` directory <!-- id: 8 -->
-  - [ ] Verify all tests for the added resource in `tests_metadata_*.json` are present in the generated test file (refer to Case 11 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing) <!-- id: 9 -->
+  - [ ] Verify if any tests for the added resource in `tests_metadata_*.json` are missing in the generated test file (refer to Case 16 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing due to excluded examples) <!-- id: 9 -->
+  - [ ] Verify that **not all** of the generated tests were skipped or reported "no tests to run" in the output (refer to Case 11 in `tgc-fix-integration-tests-skill/troubleshooting_playbook.md` if missing)<!-- id: 10 -->
 - [ ] Step 5: Fix failures & restart from Step 2 <!-- id: 5 -->
 - [ ] Step 6: Commit changes after green tests <!-- id: 6 -->
 ```
