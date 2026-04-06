@@ -41,6 +41,11 @@ export WRITE_FILES=true
 .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh <test-path> <test-name>
 ```
 
+Run this command to check for missing tests compared to metadata:
+```bash
+.agents/skills/tgc-run-integration-tests-skill/scripts/check_missing_tests.sh <ResourceName> <GeneratedTestFilePath>
+```
+
 **CAUTION**: Verify that **not all** of the tests are skipped (e.g., check for `[no tests to run]` or full `SKIP` in the test output).
 
 
