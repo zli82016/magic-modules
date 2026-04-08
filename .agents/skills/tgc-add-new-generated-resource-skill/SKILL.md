@@ -25,3 +25,16 @@ If you added or modified a generated resource, follow the steps below carefully.
 - **Enabling**: For each found YAML file:
   - Ensure `include_in_tgc_next: true` is present at the **top-level**.
   - Place it in the proper order according to the progression of fields in the `mmv1/api/resource.go` file.
+
+### Troubleshooting Build Failures
+
+### Missing Package Dependency in Shared Templates
+- **Symptom**: `go mod tidy` or compilation fails after generation because a package (e.g., `compute`) is not found in the TGC environment.
+- **Cause**: Shared templates in `mmv1/templates/terraform/constants` may contain hardcoded imports or functions relying on packages not available in TGC.
+- **Solution**: Wrap the problematic code in the template with a compiler condition to exclude it for TGC generation. You can use the helper method `IsTgcCompiler`:
+  ```tmpl
+  {{- if not $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
+  // Code to exclude for TGC (only included for standard Terraform provider)
+  {{- end }}
+  ```
+  *Note: The exact path to `IsTgcCompiler` may vary depending on the template's context (e.g., `$.IsTgcCompiler` or `$.ProductMetadata.IsTgcCompiler`).*

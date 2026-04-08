@@ -12,33 +12,39 @@ fi
 
 TGC_DIR="${TGC_DIR:-$(pwd)}" # Assume running from downstream root or provided
 
-# Find latest metadata file (skipping empty or very small files)
-METADATA_FILE=$(find "$TGC_DIR/test" -name "tests_metadata_*.json" -maxdepth 1 -size +1k | sort -r | head -n 1)
-
-if [ -z "$METADATA_FILE" ]; then
-    echo "Error: No tests_metadata_*.json found in $TGC_DIR/test/"
+# Verify generated test file exists
+if [ ! -f "$GENERATED_TEST_FILE" ]; then
+    echo "❌ Error: Generated test file not found at $GENERATED_TEST_FILE"
     exit 1
 fi
 
-echo "Using metadata file: $METADATA_FILE"
+echo "Checking tests for $RESOURCE_NAME..."
 
-# Extract test names from metadata
-echo "Extracting tests from metadata for $RESOURCE_NAME..."
-EXPECTED_TESTS=$(grep -E "\"test_name\": \"TestAcc${RESOURCE_NAME}" "$METADATA_FILE" | sed -E 's/.*"test_name": "([^"]+)".*/\1/' | sort -u)
+MISSING=0
+FOUND_ANY=0
 
-if [ -z "$EXPECTED_TESTS" ]; then
-    echo "No tests found for $RESOURCE_NAME in metadata."
+# Search all metadata files
+for METADATA_FILE in $(find "$TGC_DIR/test" -name "tests_metadata_*.json" -maxdepth 1); do
+    echo "Searching in $METADATA_FILE..."
+    EXPECTED_TESTS=$(grep -E "\"test_name\": \"TestAcc${RESOURCE_NAME}" "$METADATA_FILE" | sed -E 's/.*"test_name": "([^"]+)".*/\1/' | sort -u)
+
+    if [ -z "$EXPECTED_TESTS" ]; then
+        continue
+    fi
+
+    FOUND_ANY=1
+    for TEST in $EXPECTED_TESTS; do
+        if ! grep -q "$TEST" "$GENERATED_TEST_FILE"; then
+            echo "❌ Missing test: $TEST (found in $METADATA_FILE)"
+            MISSING=$((MISSING+1))
+        fi
+    done
+done
+
+if [ $FOUND_ANY -eq 0 ]; then
+    echo "No tests found for $RESOURCE_NAME in any metadata file."
     exit 0
 fi
-
-echo "Checking against $GENERATED_TEST_FILE..."
-MISSING=0
-for TEST in $EXPECTED_TESTS; do
-    if ! grep -q "$TEST" "$GENERATED_TEST_FILE"; then
-        echo "❌ Missing test: $TEST"
-        MISSING=$((MISSING+1))
-    fi
-done
 
 if [ $MISSING -eq 0 ]; then
     echo "✅ All tests present in generated file."
