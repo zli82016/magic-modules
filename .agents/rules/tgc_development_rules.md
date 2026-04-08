@@ -11,13 +11,6 @@ As an AI agent operating in this repository, you must **ALWAYS** follow these st
 
 2. In the downstream TGC repository, don't run command `go test`. Instead, run `make test-integration-local` for integration tests and `make test-local` for unit tests.
 
-Examples:
-make test-integration-local TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup' > alloydbBackup.log
-
-
-make test-local TEST=./pkg/...
-
-make test-local TEST=./pkg/... TESTARGS='-run=TestConvert_iamBinding'
 
 3. To fix the failed TGC integration tests
    - **don't** modify the templates in `mmv1/templates/terraform`. It is allowed to modify the templates in `mmv1/templates/tgc_next`.
@@ -32,3 +25,7 @@ make test-local TEST=./pkg/... TESTARGS='-run=TestConvert_iamBinding'
 6. Only commit files under the `mmv1` folder in the branch, and exclude scratch files like `.txt`, `.py`, and `.sh` from commits.
 
 7. DO NOT make changes directly in the downstream repository (`terraform-google-conversion`). All changes must be driven through Magic Modules (`mmv1/`).
+
+8. You must strictly follow the sequence of phases defined in `GEMINI.md` (Session Setup -> Implementation -> Unit Testing -> CAI Verification -> Integration Testing). Code generation (Phase 2) MUST be performed before unit tests (Phase 3), and unit tests MUST be performed before integration tests (Phase 5). Structure your `task.md` to reflect these phases.
+
+9. For any failure (build, unit test, integration test, or verification), stop and report the error with detailed logs. Analyze the cause and provide a solution instead of attempting automatic fixes.

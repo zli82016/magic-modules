@@ -26,7 +26,7 @@ FOUND_ANY=0
 # Search all metadata files
 for METADATA_FILE in $(find "$TGC_DIR/test" -name "tests_metadata_*.json" -maxdepth 1); do
     echo "Searching in $METADATA_FILE..."
-    EXPECTED_TESTS=$(grep -E "\"test_name\": \"TestAcc${RESOURCE_NAME}" "$METADATA_FILE" | sed -E 's/.*"test_name": "([^"]+)".*/\1/' | sort -u)
+    EXPECTED_TESTS=$(grep -E "\"test_name\": *\"TestAcc${RESOURCE_NAME}" "$METADATA_FILE" | sed -E 's/.*"test_name": *\"([^"]+)".*/\1/' | sort -u)
 
     if [ -z "$EXPECTED_TESTS" ]; then
         continue
