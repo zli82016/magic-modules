@@ -18,7 +18,8 @@ When you need to run unit tests for TGC, use this skill.
 
 If you added or modified a resource, you must run its corresponding unit tests.
 
-1. Run the test, redirecting both standard output and standard error to a log file:
+1. Use the selective test script to only run tests for changed top-level folders:
    ```bash
-   make test-unit-local TEST=./pkg/...
+   /Users/zhenhuali/Documents/workspace/feature-a/.agents/skills/tgc-run-unit-tests-skill/scripts/run_changed_folders_tests.sh
    ```
+   This script should be run in the downstream TGC repository or you can set `TGC_DIR` environment variable.
