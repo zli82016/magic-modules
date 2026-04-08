@@ -12,6 +12,5 @@ custom_agent:
     - view_file
     - run_command
     - grep_search
-    - list_dir
 
 command_execution_policy: "eager"
