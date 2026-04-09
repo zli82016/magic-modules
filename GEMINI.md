@@ -8,17 +8,20 @@ The workflow consists of the following phases, orchestrated by the Parent Agent:
 
 ## Required Skills
 Before proceeding with the workflow, ensure you are familiar with and read the following skills when prompted in the phases:
+- `sync-provider` (Phase 1)
 - `tgc-new-generated-resource-skill` (Phase 2)
 
 ## Required Subagents
-- `session-setup` (Phase 1)
+- None
 
 ### 1. Session Setup
-- **Use Subagent**: Use `session-setup` subagent to verify workspace readiness and synchronize repositories.
-- **Set Environment**: Ensure `TGC_DIR` environment variable is set to the absolute path of your active TGC downstream workspace.
+- **Set Environment**: Ensure `TGC_DIR` environment variable is set to the absolute path of your active TGC downstream workspace. On macOS, you may also need to ensure Go is available in your PATH.
   ```bash
   export TGC_DIR=/path/to/downstream/workspace
+  export PATH=/usr/local/go/bin:$PATH
   ```
+
+- **Use Skill**: Read and follow `sync-provider` skill to synchronize the downstream repository with Magic Modules.
 
 ### 2. Implementation (Parent Agent)
 - **Read Skill**: Read `tgc-new-generated-resource-skill` for guidance on adding resources.
