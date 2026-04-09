@@ -8,11 +8,10 @@ The workflow consists of the following phases, orchestrated by the Parent Agent:
 
 ## Required Skills
 Before proceeding with the workflow, ensure you are familiar with and read the following skills when prompted in the phases:
-- `sync-provider` (Phase 1)
 - `tgc-new-generated-resource-skill` (Phase 2)
 
 ## Required Subagents
-- `session-setup` (Phase 5)
+- `session-setup` (Phase 1)
 
 ### 1. Session Setup
 - **Use Subagent**: Use `session-setup` subagent to verify workspace readiness and synchronize repositories.
