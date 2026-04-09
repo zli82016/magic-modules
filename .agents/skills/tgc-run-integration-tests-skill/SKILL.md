@@ -29,5 +29,3 @@ If you added or modified a resource, you must run its corresponding integration 
    ```bash
    .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
    ```
-
-**Note**: Every time you run an integration test, save the logs to a unique file so you don't overwrite the output of previous runs.

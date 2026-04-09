@@ -23,6 +23,6 @@ As an AI agent operating in this repository, you must **ALWAYS** follow these st
 
 5. DO NOT make changes directly in the downstream repository (`terraform-google-conversion`). All changes must be driven through Magic Modules (`mmv1/`).
 
-6. You must strictly follow the sequence of phases defined in `GEMINI.md` (Session Setup -> Implementation -> Unit Testing -> CAI Verification -> Integration Testing). Code generation (Phase 2) MUST be performed before unit tests (Phase 3), and unit tests MUST be performed before integration tests (Phase 5). Structure your `task.md` to reflect these phases.
+6. You must strictly follow the sequence of phases defined in `GEMINI.md` (Session Setup -> Implementation -> Unit Testing -> Integration Testing). Code generation (Phase 2) MUST be performed before unit tests (Phase 3), and unit tests MUST be performed before integration tests (Phase 5). Structure your `task.md` to reflect these phases.
 
 7. For any failure (build, unit test, integration test, or verification), stop and report the error with detailed logs. Analyze the cause and provide a solution instead of attempting automatic fixes.

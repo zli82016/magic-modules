@@ -4,10 +4,10 @@ set -e
 # Use current directory for magic-modules, and default GOPATH for TGC downstream
 MAGIC_MODULES_PATH="${MAGIC_MODULES_PATH:-$(pwd)}"
 
-if [ -n "$1" ]; then
-  TGC_PATH="$1"
-else
-  TGC_PATH="${TGC_PATH:-$GOPATH/src/github.com/GoogleCloudPlatform/tgc-supported-resources}"
+TGC_PATH="${1:-$TGC_PATH}"
+if [ -z "$TGC_PATH" ]; then
+  echo "Error: TGC_PATH is not set and no path provided as argument."
+  exit 1
 fi
 
 echo "Starting TGC Build Process..."
