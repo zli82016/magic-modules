@@ -15,10 +15,10 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
 - None
 
 ### 1. Session Setup
-- **Set Environment**: Ensure `TGC_DIR` environment variable is set to the absolute path of your active TGC downstream workspace. On macOS, you may also need to ensure Go is available in your PATH.
+- **Set Environment**: Ensure `TGC_DIR` environment variable is set to the absolute path of your active TGC downstream workspace. On macOS, you may also need to ensure Go and Terraform are available in your PATH (e.g., `/usr/local/go/bin` for Go and `/opt/homebrew/bin` for Terraform on Apple Silicon).
   ```bash
   export TGC_DIR=/path/to/downstream/workspace
-  export PATH=/usr/local/go/bin:$PATH
+  export PATH=/usr/local/go/bin:/opt/homebrew/bin:$PATH
   ```
 
 - **Use Skill**: Read and follow `sync-provider` skill to synchronize the downstream repository with Magic Modules.
