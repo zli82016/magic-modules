@@ -9,7 +9,7 @@ The workflow consists of the following phases, orchestrated by the Parent Agent:
 ## Required Skills
 Before proceeding with the workflow, ensure you are familiar with and read the following skills when prompted in the phases:
 - `sync-provider` (Phase 1)
-- `tgc-new-generated-resource-skill` (Phase 2)
+- `tgc-implementation-and-fix-skill` (Phase 2)
 
 ## Required Subagents
 - None
@@ -24,7 +24,7 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
 - **Use Skill**: Read and follow `sync-provider` skill to synchronize the downstream repository with Magic Modules.
 
 ### 2. Implementation (Parent Agent)
-- **Read Skill**: Read `tgc-new-generated-resource-skill` for guidance on adding resources.
+- **Read Skill**: Read `tgc-implementation-and-fix-skill` to identify the task and get guidance on implementation or fixes.
 - Add or modify the resource definition in MMv1 (`mmv1/`).
 
 ### 3. Generate Code

@@ -7,17 +7,18 @@
 # ./run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <test-path> <test-target>"
+    echo "Usage: $0 <test-path> <test-target> [tgc-dir]"
     echo "Example: $0 ./test/services/alloydb TestAccAlloydbBackup"
     exit 1
 fi
 
 TEST_PATH=$1
 TEST_TARGET=$2
+TGC_DIR="${3:-$TGC_DIR}"
 
 # Ensure TGC_DIR is set
 if [ -z "$TGC_DIR" ]; then
-    echo "Error: TGC_DIR environment variable is not set."
+    echo "Error: TGC_DIR is not set and no path provided as argument."
     exit 1
 fi
 
@@ -28,7 +29,7 @@ fi
 
 # Ensure the log file is unique
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOG_FILE="${TEST_TARGET}_${TIMESTAMP}.log"
+LOG_FILE="$(echo "${TEST_TARGET}" | tr '/' '_')_${TIMESTAMP}.log"
 LOG_DIR="$TGC_DIR/debug_output/raw_logs"
 
 echo "Creating log directory $LOG_DIR..."
