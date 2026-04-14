@@ -96,3 +96,32 @@ Verify the output of `git status` in the downstream repository. It should be cle
 ### 6. Verification & Handoff
 
 Verify that the `make tgc` command succeeded without unexpected diffs. Return to the workflow that invoked this skill to proceed.
+
+---
+
+## Alternative: Synchronizing to Latest (Fast-Forward)
+
+If your goal is to bring both repositories to their most recent remote commits rather than aligning to an older base:
+
+### 1. Update Magic Modules to Latest
+Ensure you are on the correct branch and pull the latest changes:
+```bash
+git checkout <branch-name>
+git pull origin <branch-name>
+```
+
+### 2. Clean and Update Downstream to Latest
+Downstream is generated, so clean local changes first to avoid conflicts, then pull latest:
+```bash
+cd <downstream-provider-path>
+git reset --hard
+git clean -fd
+git checkout main
+git pull origin main
+```
+
+### 3. Project Latest Changes
+Return to `magic-modules` and run the build script to project all changes to the latest downstream state:
+```bash
+./.agents/skills/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
+```
