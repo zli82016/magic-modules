@@ -9,7 +9,8 @@ The workflow consists of the following phases, orchestrated by the Parent Agent:
 ## Required Skills
 Before proceeding with the workflow, ensure you are familiar with and read the following skills when prompted in the phases:
 - `sync-provider` (Phase 1)
-- `tgc-implementation-and-fix-skill` (Phase 2)
+- `implementing-and-triaging-tgc-resources` (Phase 2)
+- `fixing-tgc-resource-or-test-failures` (Phase 6)
 
 ## Required Subagents
 - None
@@ -24,8 +25,7 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
 - **Use Skill**: Read and follow `sync-provider` skill to synchronize the downstream repository with Magic Modules.
 
 ### 2. Implementation (Parent Agent)
-- **Read Skill**: Read `tgc-implementation-and-fix-skill` to identify the task and get guidance on implementation or fixes.
-- Add or modify the resource definition in MMv1 (`mmv1/`).
+- **Read Skill**: Read `implementing-and-triaging-tgc-resources` to identify the task and get guidance on implementation or fixes.
 
 ### 3. Generate Code
 - **Generate Code**: Use the automation script `./.agents/skills/tgc-build-skill/scripts/build_tgc.sh` to project changes to the downstream repository.
@@ -58,12 +58,11 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
    .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
    ```
 
-### 6. Triage and Fix (Parent Agent)
-- If integration tests fail, analyze the logs and report the error using the template defined in Step 2.
+### 6. Fix (Parent Agent)
+- **Read Skill**: Read `fixing-tgc-resource-or-test-failures` to report and fix failures.
 - Apply fixes in MMv1 according to triage rules and troubleshooting playbooks.
 > [!IMPORTANT]
 > **After ANY fix applied in Step 6, you MUST repeat the full verification loop:**
-> 1. **Step 2 (Implementation)**: Add/modify resource definition.
 > 2. **Step 3 (Generate Code)**: Generate code.
 > 3. **Step 4 (Unit Testing)**: Run unit tests.
 > 4. **Step 5 (Integration Testing)**: Run integration tests.
