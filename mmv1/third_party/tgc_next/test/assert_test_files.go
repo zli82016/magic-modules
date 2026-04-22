@@ -291,7 +291,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 // Gets the ancestry cache for tfplan2cai conversion and the default project
 func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	ancestryCache := make(map[string]string, 0)
-	defaultProject := ""
+	extractedProject := ""
 
 	for _, asset := range assets {
 		ancestors := asset.Ancestors
@@ -308,9 +308,9 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 
 			if _, ok := ancestryCache[ancestors[0]]; !ok {
 				ancestryCache[ancestors[0]] = path
-				if defaultProject == "" {
+				if extractedProject == "" {
 					if s, hasPrefix := strings.CutPrefix(ancestors[0], "projects/"); hasPrefix {
-						defaultProject = s
+						extractedProject = s
 					}
 				}
 			}
@@ -324,13 +324,33 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 					}
 				}
 
-				if defaultProject == "" {
-					defaultProject = project
+				if extractedProject == "" {
+					extractedProject = project
 				}
 			}
 		}
 	}
-	return ancestryCache, defaultProject
+
+	if extractedProject == "" {
+		extractedProject = defaultProject
+		projectKey := "projects/" + extractedProject
+		if _, ok := ancestryCache[projectKey]; !ok {
+			// Fallback to map this project to the org found in assets or default org
+			var parentOrg string
+			for k := range ancestryCache {
+				if strings.HasPrefix(k, "organizations/") {
+					parentOrg = k
+					break
+				}
+			}
+			if parentOrg == "" {
+				parentOrg = "organizations/" + defaultOrganization
+			}
+			ancestryCache[projectKey] = parentOrg
+		}
+	}
+
+	return ancestryCache, extractedProject
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2

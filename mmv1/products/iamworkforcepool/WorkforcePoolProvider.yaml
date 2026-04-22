@@ -35,6 +35,7 @@ async:
   operation:
     base_url: '{{op_id}}'
 autogen_async: true
+include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl
@@ -345,6 +346,7 @@ properties:
             exactly_one_of:
               - oidc.0.client_secret.0.value
             custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_oidc_client_secret_value.go.tmpl
+            tgc_ignore_terraform_custom_flatten: true
             properties:
               - name: plainText
                 type: String
@@ -396,6 +398,7 @@ properties:
               type: String
       - name: jwksJson
         type: String
+        is_missing_in_cai: true
         description: |
           OIDC JWKs in JSON String format. For details on definition of a
           JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
@@ -451,6 +454,7 @@ properties:
             exactly_one_of:
               - extraAttributesOauth2Client.0.client_secret.0.value
             custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_secret_value.go.tmpl
+            tgc_ignore_terraform_custom_flatten: true
             properties:
               - name: plainText
                 type: String
@@ -543,6 +547,7 @@ properties:
             description: |
               The value of the client secret.
             custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_extended_attributes_oauth2_config_client_secret_value.go.tmpl
+            tgc_ignore_terraform_custom_flatten: true
             properties:
               - name: plainText
                 type: String
