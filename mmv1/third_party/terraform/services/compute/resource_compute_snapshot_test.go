@@ -209,12 +209,16 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-region-instant-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-region-instant-snapshots-tagvalue", sharedTagKey, org)
 
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-snapshot-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-snapshot-tagvalue", sharedTagkey, org)
+	context := map[string]interface{}{
+		"random_suffix": suffix,
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -222,36 +226,30 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSnapshot_resourceManagerTags(snapshotName, diskName, tagKeyResult["name"], tagValueResult["name"]),
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
 			},
 		},
 	})
 }
 
-func testAccComputeSnapshot_resourceManagerTags(snapshotName, diskName, tagKey, tagValue string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name  = "%s"
-  image = data.google_compute_image.my_image.self_link
-  size  = 10
-  type  = "pd-ssd"
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-ssd"
   zone  = "us-central1-a"
+  size = 10
 }
 
 resource "google_compute_snapshot" "foobar" {
-  name        = "%s"
-  source_disk = google_compute_disk.foobar.name
-  zone        = "us-central1-a"
+  name        = "tf-test-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.disk.self_link
+  zone  = "us-central1-a"
   params {
-	resource_manager_tags = {
-		"%s" = "%s"
-	}
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
   }
 }
-`, diskName, snapshotName, tagKey, tagValue)
+`, context)
 }
