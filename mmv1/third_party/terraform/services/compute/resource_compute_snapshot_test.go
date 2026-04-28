@@ -208,11 +208,13 @@ resource "google_compute_disk" "persistent" {
 func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
-	pid := envvar.GetTestProjectFromEnv()
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_id":    pid,
-	}
+	org := envvar.GetTestOrgFromEnv(t)
+	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-snapshot-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-snapshot-tagvalue", sharedTagkey, org)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -220,49 +222,21 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSnapshot_resourceManagerTags(context),
+				Config: testAccComputeSnapshot_resourceManagerTags(snapshotName, diskName, tagKeyResult["name"], tagValueResult["name"]),
 			},
 		},
 	})
 }
 
-func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_tags_tag_key" "tag_key" {
-  parent     = "projects/%{project_id}"
-  short_name = "tf-test-key-%{random_suffix}"
-}
-
-resource "google_tags_tag_value" "tag_value" {
-  parent     = "tagKeys/${google_tags_tag_key.tag_key.name}"
-  short_name = "tf-test-value-%{random_suffix}"
-}
-
-data "google_client_openid_userinfo" "me" {}
-
-locals {
-  member_type = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com") ? "serviceAccount" : "user"
-  iam_member  = "${local.member_type}:${data.google_client_openid_userinfo.me.email}"
-}
-
-resource "google_tags_tag_value_iam_member" "value_user" {
-  tag_value = google_tags_tag_value.tag_value.name
-  role      = "roles/resourcemanager.tagUser"
-  member    = local.iam_member
-}
-
-resource "time_sleep" "wait_for_tag_iam" {
-  depends_on      = [google_tags_tag_value_iam_member.value_user]
-  create_duration = "60s"
-}
-
+func testAccComputeSnapshot_resourceManagerTags(snapshotName, diskName, tagKey, tagValue string) string {
+	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
 }
 
 resource "google_compute_disk" "foobar" {
-  name  = "tf-test-disk-%{random_suffix}"
+  name  = "%s"
   image = data.google_compute_image.my_image.self_link
   size  = 10
   type  = "pd-ssd"
@@ -270,15 +244,14 @@ resource "google_compute_disk" "foobar" {
 }
 
 resource "google_compute_snapshot" "foobar" {
-  name        = "tf-test-snapshot-%{random_suffix}"
+  name        = "%s"
   source_disk = google_compute_disk.foobar.name
   zone        = "us-central1-a"
   params {
-    resource_manager_tags = {
-      "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
-    }
+	resource_manager_tags = {
+		"%s" = "%s"
+	}
   }
-  depends_on = [time_sleep.wait_for_tag_iam]
 }
-`, context)
+`, diskName, snapshotName, tagKey, tagValue)
 }
