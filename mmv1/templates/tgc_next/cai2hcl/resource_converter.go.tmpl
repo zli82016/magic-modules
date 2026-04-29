@@ -75,6 +75,7 @@ var (
 type {{ $.ResourceName -}}Cai2hclConverter struct {
 	name   string
 	schema map[string]*schema.Schema
+	provider *schema.Provider
 }
 
 func New{{ $.ResourceName -}}Cai2hclConverter(provider *schema.Provider) models.Cai2hclConverter {
@@ -83,6 +84,7 @@ func New{{ $.ResourceName -}}Cai2hclConverter(provider *schema.Provider) models.
 	return &{{ $.ResourceName -}}Cai2hclConverter{
 		name:   {{ $.ResourceName -}}SchemaName,
 		schema: schema,
+		provider: provider,
 	}
 }
 
@@ -145,9 +147,20 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
-{{/* Attempt to parse all self-link parameters from asset name. */}}
-	outputFields := {{ $.OutputFieldSetStr }}
-	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.Cai2hclAssetNameTemplate }}", outputFields, hclData)
+	d.SetId(asset.Name)
+	resDataList, err := resource{{ $.ResourceName -}}Import(d, config)
+	if err != nil {
+		return nil, fmt.Errorf("error importing resource: %w", err)
+	}
+	if len(resDataList) > 0 {
+		d = resDataList[0]
+		for k, _ := range c.schema {
+			val := d.Get(k)
+			if val != nil && !reflect.ValueOf(val).IsZero() {
+				hclData[k] = val
+			}
+		}
+	}
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
@@ -185,3 +198,60 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 	{{ customTemplate $ $.CustomCode.Decoder false -}}
 }
 {{- end }}
+
+func resource{{ $.ResourceName -}}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+    {{- if $.CustomCode.CustomImport }}
+        {{ customTemplate $ $.CustomCode.CustomImport false -}}
+    {{- else }}
+    config := meta.(*transport_tpg.Config)
+    
+	idRegexes := []string{
+		"^{{ format2regex $.CaiAssetName }}$",
+	}
+
+	matched := false
+	for _, idFormat := range idRegexes {
+		re := regexp.MustCompile(idFormat)
+		if fieldValues := re.FindStringSubmatch(d.Id()); fieldValues != nil {
+			for i := 1; i < len(fieldValues); i++ {
+				fieldName := re.SubexpNames()[i]
+				fieldValue := fieldValues[i]
+				if fieldValue != "" {
+					d.Set(fieldName, fieldValue)
+				}
+			}
+			matched = true
+			break
+		}
+	}
+	if !matched {
+		return nil, fmt.Errorf("Import id %q doesn't match any of the accepted formats", d.Id())
+	}
+
+    // Replace import id for the resource id
+    id, err := tpgresource.ReplaceVars{{ if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat }}")
+    if err != nil {
+        return nil, fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+        {{ if $.VirtualFields }}
+
+    // Explicitly set virtual fields to default values on import
+            {{- range $vf := $.VirtualFields }}
+                {{- if not (eq $vf.DefaultValue nil) }}
+    if err := d.Set("{{ $vf.Name }}", {{ $vf.GoLiteral $vf.DefaultValue }}); err != nil {
+        return nil, fmt.Errorf("Error setting {{ $vf.Name }}: %s", err)
+    }
+                {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- if $.CustomCode.PostImport }}
+            {{- $content := customTemplate $ $.CustomCode.PostImport false }}
+            {{- if not (contains $content "waitFor") }}
+                {{ $content }}
+            {{- end }}
+        {{- end }}
+
+    return []*schema.ResourceData{d}, nil
+    {{- end }}
+}

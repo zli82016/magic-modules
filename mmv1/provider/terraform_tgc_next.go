@@ -250,6 +250,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/transport/retry_utils.go":            "third_party/terraform/transport/retry_utils.go",
 		"pkg/transport/transport.go":              "third_party/terraform/transport/transport.go",
 		"pkg/tpgresource/utils.go":                "third_party/terraform/tpgresource/utils.go",
+		"pkg/tpgresource/import.go":               "third_party/terraform/tpgresource/import.go",
 		"pkg/tpgresource/self_link_helpers.go":    "third_party/terraform/tpgresource/self_link_helpers.go",
 		"pkg/tpgresource/hashcode.go":             "third_party/terraform/tpgresource/hashcode.go",
 		"pkg/tpgresource/regional_utils.go":       "third_party/terraform/tpgresource/regional_utils.go",
@@ -365,6 +366,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		})
 	}
 }
+
 func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
