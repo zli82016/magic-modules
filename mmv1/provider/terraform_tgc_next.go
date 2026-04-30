@@ -141,7 +141,7 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 
 func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) error {
 	if len(object.TGCTests) == 0 {
-		return fmt.Errorf("No TGC tests for resource %s", object.Name)
+		return fmt.Errorf("No TGC tests generated for resource %s. This commonly happens when all examples in the YAML are excluded AND no matching handwritten tests were found (ensure handwritten test file names match the expected convention, e.g., resource_<product>_<resource_name>_test.go)", object.Name)
 	}
 
 	for _, test := range object.TGCTests {
@@ -436,18 +436,10 @@ func (tgc TerraformGoogleConversionNext) addTestsByTestNameMatch(object *api.Res
 				if _, ok := testNamesInYAML[testName]; ok {
 					continue
 				}
-				alreadyAdded := false
-				for _, t := range tests {
-					if t.Name == testName {
-						alreadyAdded = true
-						break
-					}
-				}
-				if !alreadyAdded {
-					tests = append(tests, resource.TGCTest{
-						Name: testName,
-					})
-				}
+
+				tests = append(tests, resource.TGCTest{
+					Name: testName,
+				})
 			}
 		}
 	}
@@ -468,7 +460,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	for err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
-				log.Printf("no handwritten test file found for %s", resourceFullName)
+				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
 				return nil
 			}
 			handwrittenTestFilePath += ".tmpl"
