@@ -217,7 +217,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Create(ctx context.Context, 
 	var schemaDefaultVals fwtransport.DefaultVars
 
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases?format=keycertfile&alias={{alias}}&ignoreExpiryValidation=true")
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases?format=keycertfile&alias={{alias}}&ignoreExpiryValidation=true")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -298,7 +298,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Update(ctx context.Context, 
 
 	var schemaDefaultVals fwtransport.DefaultVars
 
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}?ignoreExpiryValidation=true")
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}?ignoreExpiryValidation=true")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -344,7 +344,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Delete(ctx context.Context, 
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 
 	var schemaDefaultVals fwtransport.DefaultVars
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -369,7 +369,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) refresh(ctx context.Context,
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 
 	var schemaDefaultVals fwtransport.DefaultVars
-	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
+	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 	if diags.HasError() {
 		return
 	}
