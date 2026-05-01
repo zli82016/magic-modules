@@ -12,7 +12,7 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
 ## The Workflow
 
 ### 1. Session Setup
-- **Initialize Task List**: You MUST create a `task.md` file containing all workflow phases (Session Setup, Triage & Isolate, Fix, Generate Code, Unit Testing, Integration Testing, Finalization) as uncompleted tasks before performing any other actions.
+- **Initialize Task List**: You MUST create a `task.md` file containing all workflow phases (Session Setup, Triage & Isolate, Fix, Generate Code, Unit Testing, Integration Testing, Finalization) as uncompleted tasks before performing any other actions. If the failure involves an integration test, you MUST include explicit sub-tasks in the Fix phase of `task.md` to trace the failure backwards (inspecting `Test_roundtrip.tf`, `Test_roundtrip.json`, `Test_export.tf`, `Test.json`).
 - **Set Environment**: Ensure `TGC_DIR` environment variable is set to the absolute path of your active TGC downstream workspace.
   ```bash
   export TGC_DIR=/path/to/downstream/workspace
@@ -33,6 +33,8 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
 ### 3. Fix (Parent Agent)
 - **Use Skill**: You MUST read the `fixing-tgc-resource-or-test-failures` skill.
 - **Trace Failure**: Follow the "Tracing Failures Backwards" protocol in the Playbook to isolate the stage where data was lost before proposing a solution.
+- **Report Failure**: Report the failure using the template in `GEMINI.md`.
+- **[MANDATORY] Stop and wait for user approval before applying the fix.**
 
 ### 4. Generate Code
 - **Generate Code**: Use the automation script `./.agents/skills/tgc-build-skill/scripts/build_tgc.sh $TGC_DIR` to project changes to the downstream repository.
