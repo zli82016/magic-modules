@@ -349,8 +349,29 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
+		var attemptedTests []string
+		for _, t := range replayingResult.FailedTests {
+			prefix := t + "__"
+			hasSubtests := false
+			for _, st := range recordingResult.PassedSubtests {
+				if strings.HasPrefix(st, prefix) {
+					attemptedTests = append(attemptedTests, st)
+					hasSubtests = true
+				}
+			}
+			for _, st := range recordingResult.FailedSubtests {
+				if strings.HasPrefix(st, prefix) {
+					attemptedTests = append(attemptedTests, st)
+					hasSubtests = true
+				}
+			}
+			if !hasSubtests {
+				attemptedTests = append(attemptedTests, t)
+			}
+		}
+
 		recordReplayData := recordReplay{
-			AttemptedTests:                replayingResult.FailedTests,
+			AttemptedTests:                attemptedTests,
 			RecordingResult:               subtestResult(recordingResult),
 			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
@@ -659,6 +680,7 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"add":          func(i, j int) int { return i + j },
 		"color":        color,
 		"compoundTest": compoundTest,
+		"replace":      strings.ReplaceAll,
 		"contains": func(slice []string, item string) bool {
 			for _, s := range slice {
 				if s == item {
