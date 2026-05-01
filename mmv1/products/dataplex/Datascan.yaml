@@ -56,11 +56,11 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
     - '{{data_scan_id}}'
 include_in_tgc_next: true
-tgc_tests:
-  - name: 'TestAccDataplexDatascan_dataplexDatascanQualityReusableRulesCatalogBased_update'
-    skip: 'Test data unavailable in CAIS and requires long sleep times'
-  - name: 'TestAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_update'
-    skip: 'Test data unavailable in CAIS and requires long sleep times'
+# tgc_tests:
+#   - name: 'TestAccDataplexDatascan_dataplexDatascanQualityReusableRulesCatalogBased_update'
+#     skip: 'Test data unavailable in CAIS and requires long sleep times'
+#   - name: 'TestAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_update'
+#     skip: 'Test data unavailable in CAIS and requires long sleep times'
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/dataplex_datascan.go.tmpl'
 examples:
@@ -189,7 +189,7 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     external_providers: ["time"]
-    tgc_skip_test: 'Test data unavailable in CAIS and requires long sleep times'
+    # tgc_skip_test: 'Test data unavailable in CAIS and requires long sleep times'
   - name: 'dataplex_datascan_data_quality_template_reference'
     primary_resource_id: 'data_quality_template_reference'
     vars:

@@ -128,7 +128,18 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 				if allUnavailable {
 					t.Skipf("%s: Test skipped because data was unavailable after all %d attempts: %v", tName, len(attemptErrors), err)
 				} else {
-					t.Fatalf("%s: Failed after %d attempts. Last error: %v", tName, len(attemptErrors), err)
+					var firstRealError error
+					for _, e := range attemptErrors {
+						if !strings.Contains(e.Error(), "test data is unavailable") {
+							firstRealError = e
+							break
+						}
+					}
+					if firstRealError != nil {
+						t.Fatalf("%s: Failed after %d attempts. First real error: %v", tName, len(attemptErrors), firstRealError)
+					} else {
+						t.Fatalf("%s: Failed after %d attempts. Last error: %v", tName, len(attemptErrors), err)
+					}
 				}
 			}
 		})
