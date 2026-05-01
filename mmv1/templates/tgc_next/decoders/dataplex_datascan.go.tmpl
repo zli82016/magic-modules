@@ -1,0 +1,11 @@
+if vType, ok := res["type"].(string); ok && vType == "DATA_DOCUMENTATION" {
+	if _, ok := res["dataDocumentationSpec"]; !ok {
+		res["dataDocumentationSpec"] = map[string]interface{}{}
+	}
+}
+if vType, ok := res["type"].(string); ok && vType == "DATA_QUALITY" {
+	if _, ok := res["dataQualitySpec"]; !ok {
+		res["dataQualitySpec"] = map[string]interface{}{}
+	}
+}
+return res, hclData, nil
