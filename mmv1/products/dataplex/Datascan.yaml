@@ -189,7 +189,7 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     external_providers: ["time"]
-    # tgc_skip_test: 'Test data unavailable in CAIS and requires long sleep times'
+    tgc_skip_test: 'Test data unavailable in CAIS and requires long sleep times'
   - name: 'dataplex_datascan_data_quality_template_reference'
     primary_resource_id: 'data_quality_template_reference'
     vars:
