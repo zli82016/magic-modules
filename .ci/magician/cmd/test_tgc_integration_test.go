@@ -16,77 +16,114 @@
 package cmd
 
 import (
+	"reflect"
+	"sort"
 	"testing"
 )
 
 func TestShouldRunTests(t *testing.T) {
 	cases := []struct {
-		name         string
-		changedFiles []string
-		expected     bool
+		name          string
+		changedFiles  []string
+		expectedRun   bool
+		expectedPaths []string
 	}{
 		{
-			name:         "relevant go file",
-			changedFiles: []string{"test/services/alloydb/alloydb_cluster_generated_test.go"},
-			expected:     true,
+			name:          "relevant go file in services folder",
+			changedFiles:  []string{"test/services/alloydb/alloydb_cluster_generated_test.go"},
+			expectedRun:   true,
+			expectedPaths: []string{"./test/services/alloydb"},
 		},
 		{
-			name:         "non-go file",
-			changedFiles: []string{"docs/supported_resources.md"},
-			expected:     false,
+			name:          "non-go file",
+			changedFiles:  []string{"docs/supported_resources.md"},
+			expectedRun:   false,
+			expectedPaths: nil,
 		},
 		{
-			name:         "ignored directory cai2hcl",
-			changedFiles: []string{"cai2hcl/services/certificatemanager/certificate.go"},
-			expected:     false,
+			name:          "ignored directory cai2hcl",
+			changedFiles:  []string{"cai2hcl/services/certificatemanager/certificate.go"},
+			expectedRun:   false,
+			expectedPaths: nil,
 		},
 		{
-			name:         "ignored directory tfplan2cai",
-			changedFiles: []string{"tfplan2cai/converters/google/resources/services/biglakeiceberg"},
-			expected:     false,
+			name:          "ignored directory tfplan2cai",
+			changedFiles:  []string{"tfplan2cai/converters/google/resources/services/biglakeiceberg"},
+			expectedRun:   false,
+			expectedPaths: nil,
 		},
 		{
-			name:         "pkg/services file (ignored by default)",
-			changedFiles: []string{"pkg/services/compute/compute_disk.go"},
-			expected:     false,
+			name:          "pkg/services file (ignored by default)",
+			changedFiles:  []string{"pkg/services/compute/compute_disk.go"},
+			expectedRun:   false,
+			expectedPaths: nil,
 		},
 		{
-			name:         "pkg/services cai2hcl file (no longer exception)",
-			changedFiles: []string{"pkg/services/compute/compute_disk_cai2hcl.go"},
-			expected:     false,
+			name:          "pkg/services cai2hcl file (no longer exception)",
+			changedFiles:  []string{"pkg/services/compute/compute_disk_cai2hcl.go"},
+			expectedRun:   false,
+			expectedPaths: nil,
 		},
 		{
-			name:         "pkg/services tfplan2cai file (no longer exception)",
-			changedFiles: []string{"pkg/services/compute/compute_disk_tfplan2cai.go"},
-			expected:     false,
+			name:          "pkg/services tfplan2cai file (no longer exception)",
+			changedFiles:  []string{"pkg/services/compute/compute_disk_tfplan2cai.go"},
+			expectedRun:   false,
+			expectedPaths: nil,
 		},
 		{
-			name:         "pkg/cai2hcl file",
-			changedFiles: []string{"pkg/cai2hcl/converters/convert_resource.go"},
-			expected:     true,
+			name:          "pkg/cai2hcl file (core exception)",
+			changedFiles:  []string{"pkg/cai2hcl/converters/convert_resource.go"},
+			expectedRun:   true,
+			expectedPaths: nil,
 		},
 		{
-			name:         "pkg/tfplan2cai file",
-			changedFiles: []string{"pkg/tfplan2cai/converters/cai/convert.go"},
-			expected:     true,
+			name:          "pkg/tfplan2cai file (core exception)",
+			changedFiles:  []string{"pkg/tfplan2cai/converters/cai/convert.go"},
+			expectedRun:   true,
+			expectedPaths: nil,
 		},
 		{
-			name:         "pkg/caiasset file",
-			changedFiles: []string{"pkg/caiasset/asset.go"},
-			expected:     true,
+			name:          "pkg/caiasset file (core exception)",
+			changedFiles:  []string{"pkg/caiasset/asset.go"},
+			expectedRun:   true,
+			expectedPaths: nil,
 		},
 		{
-			name:         "multiple files, one relevant",
-			changedFiles: []string{"README.md", "caiasset/asset.go", "pkg/cai2hcl/converters/convert_resource.go"},
-			expected:     true,
+			name:          "multiple files, one relevant core exception",
+			changedFiles:  []string{"README.md", "caiasset/asset.go", "pkg/cai2hcl/converters/convert_resource.go"},
+			expectedRun:   true,
+			expectedPaths: nil,
+		},
+		{
+			name:          "test folder direct child",
+			changedFiles:  []string{"test/assert_test_files.go"},
+			expectedRun:   true,
+			expectedPaths: nil,
+		},
+		{
+			name:          "mix of test services and test folder direct child",
+			changedFiles:  []string{"test/services/alloydb/alloydb_cluster_generated_test.go", "test/assert_test_files.go"},
+			expectedRun:   true,
+			expectedPaths: nil,
+		},
+		{
+			name:          "multiple test service files",
+			changedFiles:  []string{"test/services/alloydb/alloydb_cluster_generated_test.go", "test/services/apigee/apigee_test.go"},
+			expectedRun:   true,
+			expectedPaths: []string{"./test/services/alloydb", "./test/services/apigee"},
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := shouldRunTests(tc.changedFiles)
-			if actual != tc.expected {
-				t.Errorf("expected %v, got %v", tc.expected, actual)
+			actualRun, actualPaths := shouldRunTests(tc.changedFiles)
+			if actualRun != tc.expectedRun {
+				t.Errorf("expected run: %v, got %v", tc.expectedRun, actualRun)
+			}
+			sort.Strings(actualPaths)
+			sort.Strings(tc.expectedPaths)
+			if !reflect.DeepEqual(actualPaths, tc.expectedPaths) {
+				t.Errorf("expected paths: %v, got %v", tc.expectedPaths, actualPaths)
 			}
 		})
 	}

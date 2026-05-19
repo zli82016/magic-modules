@@ -65,7 +65,8 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	// Convert the raw diff string into a slice of strings
 	changedFiles := strings.Split(strings.TrimSpace(diffs), "\n")
 
-	if !shouldRunTests(changedFiles) {
+	runTests, testPaths := shouldRunTests(changedFiles)
+	if !runTests {
 		fmt.Println("Skipping tests: No relevant go files changed")
 		return nil
 	}
@@ -88,7 +89,11 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 		fmt.Println("Error running make build: ", err)
 	}
 	state := "success"
-	if _, err := rnr.Run("make", []string{"test-integration"}, nil); err != nil {
+	makeArgs := []string{"test-integration"}
+	if len(testPaths) > 0 {
+		makeArgs = append(makeArgs, fmt.Sprintf("TESTPATH=%s", strings.Join(testPaths, " ")))
+	}
+	if _, err := rnr.Run("make", makeArgs, nil); err != nil {
 		fmt.Println("Error running make test-integration: ", err)
 		state = "failure"
 	}
@@ -99,7 +104,11 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	return nil
 }
 
-func shouldRunTests(changedFiles []string) bool {
+func shouldRunTests(changedFiles []string) (bool, []string) {
+	runTests := false
+	runAllTests := false
+	servicePaths := make(map[string]bool)
+
 	for _, file := range changedFiles {
 		fmt.Println("current file:", file)
 		if !strings.HasSuffix(file, ".go") {
@@ -109,7 +118,8 @@ func shouldRunTests(changedFiles []string) bool {
 		// Handle pkg/services/ and its exceptions
 		if strings.HasPrefix(file, "pkg/") {
 			if strings.HasPrefix(file, "pkg/cai2hcl/") || strings.HasPrefix(file, "pkg/tfplan2cai/") || strings.HasPrefix(file, "pkg/caiasset/") {
-				return true
+				runTests = true
+				runAllTests = true
 			}
 			continue
 		}
@@ -120,10 +130,39 @@ func shouldRunTests(changedFiles []string) bool {
 		}
 
 		// If a .go file makes it this far, it needs testing
-		return true
+		runTests = true
+
+		if strings.HasPrefix(file, "test/") {
+			if strings.HasPrefix(file, "test/services/") {
+				parts := strings.Split(file, "/")
+				if len(parts) >= 3 {
+					servicePaths["./test/services/"+parts[2]] = true
+				} else {
+					runAllTests = true
+				}
+			} else if !strings.Contains(strings.TrimPrefix(file, "test/"), "/") {
+				// Direct child file in test/ folder
+				runAllTests = true
+			} else {
+				runAllTests = true
+			}
+		} else {
+			runAllTests = true
+		}
 	}
 
-	return false
+	if !runTests {
+		return false, nil
+	}
+	if runAllTests || len(servicePaths) == 0 {
+		return true, nil
+	}
+
+	var paths []string
+	for path := range servicePaths {
+		paths = append(paths, path)
+	}
+	return true, paths
 }
 
 func init() {
