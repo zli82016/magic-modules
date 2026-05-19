@@ -57,4 +57,4 @@ As an AI agent operating in this repository, you must **ALWAYS** follow these st
 
 14. **Mandatory Tracing Checklist**: When fixing integration test failures, the agent MUST include explicit sub-items in `task.md` to track the verification of `Test_roundtrip.tf`, `Test_roundtrip.json`, and `Test_export.tf`.
 
-15. **Run All Tests Before Analysis**: When fixing integration test failures, the agent MUST run all integration tests for the affected resource (e.g., by running the top-level test instead of a specific subtest) before analyzing the failure or proposing a solution. Do not assume a user-reported failure is the only one.
+15. **Run All Failed Tests Before Analysis**: When fixing integration test failures, the agent MUST run all failed integration tests for the affected resource before analyzing the failure or proposing a solution.
