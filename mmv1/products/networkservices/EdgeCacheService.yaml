@@ -13,6 +13,8 @@
 
 ---
 name: 'EdgeCacheService'
+include_in_tgc_next: true
+
 description: |
   EdgeCacheService defines the IP addresses, protocols, security policies, cache policies and routing configuration.
 docs:

@@ -13,6 +13,8 @@
 
 ---
 name: 'HttpRoute'
+include_in_tgc_next: true
+
 description: |
   HttpRoute is the resource defining how HTTP traffic should be routed by a Mesh or Gateway resource.
 references:

@@ -13,6 +13,8 @@
 
 ---
 name: 'TlsRoute'
+include_in_tgc_next: true
+
 description: |
   TlsRoute defines how traffic should be routed based on SNI and other matching L3 attributes.
 references:

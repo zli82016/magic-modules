@@ -13,6 +13,8 @@
 
 ---
 name: 'EdgeCacheKeyset'
+include_in_tgc_next: true
+
 description: |
   EdgeCacheKeyset represents a collection of public keys used for validating signed requests.
 references:
