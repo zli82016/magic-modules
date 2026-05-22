@@ -13,6 +13,7 @@
 
 ---
 name: 'CertificateAuthority'
+include_in_tgc_next: true
 description: |
   A CertificateAuthority represents an individual Certificate Authority. A
   CertificateAuthority can be used to create Certificates.
