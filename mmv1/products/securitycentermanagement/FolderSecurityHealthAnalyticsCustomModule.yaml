@@ -13,6 +13,7 @@
 
 ---
 name: 'FolderSecurityHealthAnalyticsCustomModule'
+include_in_tgc_next: true
 api_resource_type_kind: SecurityHealthAnalyticsCustomModule
 api_variant_patterns:
   - 'folders/{folder}/locations/{location}/securityHealthAnalyticsCustomModules/{securityHealthAnalyticsCustomModule}'
@@ -49,7 +50,7 @@ examples:
     test_vars_overrides:
       'sleep': 'true'
     external_providers: ["random", "time"]
-    exclude_test: true
+#    exclude_test: true
   - name: 'scc_management_folder_security_health_analytics_custom_module_full'
     primary_resource_id: 'example'
     vars:
