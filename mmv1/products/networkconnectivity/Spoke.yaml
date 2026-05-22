@@ -13,6 +13,7 @@
 
 ---
 name: 'Spoke'
+include_in_tgc_next: true
 description: "The NetworkConnectivity Spoke resource"
 references:
   guides:
