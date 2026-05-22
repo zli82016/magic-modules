@@ -13,7 +13,9 @@
 
 ---
 name: 'OauthIdpConfig'
-api_resource_type_kind: OAuthIdpConfig
+include_in_tgc_next: true
+api_resource_type_kind: OauthIdpConfig
+
 description: |
   OIDC IdP configuration for a Identity Toolkit project.
 
