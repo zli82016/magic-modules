@@ -1,0 +1,27 @@
+if spec, ok := res["spec"].(map[string]interface{}); ok {
+	if clusterupgrade, ok := spec["clusterupgrade"].(map[string]interface{}); ok {
+		if clusterupgrade["upstreamFleets"] == nil {
+			clusterupgrade["upstreamFleets"] = []interface{}{}
+		}
+	}
+}
+
+if fleetDefaultMemberConfig, ok := res["fleetDefaultMemberConfig"].(map[string]interface{}); ok {
+	if policycontroller, ok := fleetDefaultMemberConfig["policycontroller"].(map[string]interface{}); ok {
+		if policyControllerHubConfig, ok := policycontroller["policyControllerHubConfig"].(map[string]interface{}); ok {
+			if policyContent, ok := policyControllerHubConfig["policyContent"].(map[string]interface{}); ok {
+				if bundles, ok := policyContent["bundles"].(map[string]interface{}); ok {
+					for _, b := range bundles {
+						if bundle, ok := b.(map[string]interface{}); ok {
+							if bundle["exemptedNamespaces"] == nil {
+								bundle["exemptedNamespaces"] = []interface{}{}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+return res, hclData, nil

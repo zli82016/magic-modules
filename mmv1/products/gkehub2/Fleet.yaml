@@ -13,6 +13,7 @@
 
 ---
 name: 'Fleet'
+include_in_tgc_next: true
 description: |
   Fleet contains information about a group of clusters.
 references:

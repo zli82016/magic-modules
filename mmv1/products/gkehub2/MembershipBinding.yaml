@@ -13,6 +13,7 @@
 
 ---
 name: 'MembershipBinding'
+include_in_tgc_next: true
 description: |
   MembershipBinding is a subresource of a Membership, representing what Fleet Scopes (or other, future Fleet resources) a Membership is bound to.
 references:
@@ -34,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+include_in_tgc_next: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
