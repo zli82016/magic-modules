@@ -13,6 +13,7 @@
 
 ---
 name: 'WorkforcePoolProviderKey'
+include_in_tgc_next: true
 description: |
   Represents a public key configuration for a Workforce Pool Provider. The key can be configured in your identity provider to encrypt SAML assertions.
   Google holds the corresponding private key, which it uses to decrypt encrypted tokens.

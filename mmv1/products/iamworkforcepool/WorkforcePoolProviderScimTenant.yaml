@@ -13,6 +13,7 @@
 
 ---
 name: 'WorkforcePoolProviderScimTenant'
+include_in_tgc_next: true
 description: |
   Represents a SCIM tenant configuration for a Workforce Pool Provider.
   The SCIM tenant configuration allows for the synchronization of user/group identities from external identity provider into Google Cloud using the System for Cross-domain Identity Management (SCIM) protocol.

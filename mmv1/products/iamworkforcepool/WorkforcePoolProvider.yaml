@@ -13,6 +13,7 @@
 
 ---
 name: WorkforcePoolProvider
+include_in_tgc_next: true
 description: |
   A configuration for an external identity provider.
 references:
@@ -37,10 +38,19 @@ async:
 autogen_async: true
 custom_code:
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/iam_workforce_pool_provider_decoder.go.tmpl
+
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl
   post_create: templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl
   post_update: templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl
+tgc_tests:
+  - name: 'TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc'
+    skip: 'Panic in decoder with nil interface'
+  - name: 'TestAccIAMWorkforcePoolWorkforcePoolProvider_saml'
+    skip: 'Panic in decoder with nil interface'
+
 examples:
+
   - name: iam_workforce_pool_provider_saml_basic
     primary_resource_id: example
     vars:
@@ -601,3 +611,7 @@ properties:
   - name: detailedAuditLogging
     type: Boolean
     description: If true, populates additional debug information in Cloud Audit Logs for this provider. Logged attribute mappings and values can be found in `sts.googleapis.com` data access logs. Default value is false.
+
+
+
+

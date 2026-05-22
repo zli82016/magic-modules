@@ -1,0 +1,28 @@
+if oidc, ok := res["oidc"].(map[string]interface{}); ok {
+    if secret, ok := oidc["clientSecret"].(map[string]interface{}); ok {
+        if value, ok := secret["value"].(map[string]interface{}); ok {
+            if value["thumbprint"] == nil {
+                value["thumbprint"] = ""
+            }
+        }
+    }
+}
+if extraAttributes, ok := res["extraAttributesOauth2Client"].(map[string]interface{}); ok {
+    if secret, ok := extraAttributes["clientSecret"].(map[string]interface{}); ok {
+        if value, ok := secret["value"].(map[string]interface{}); ok {
+            if value["thumbprint"] == nil {
+                value["thumbprint"] = ""
+            }
+        }
+    }
+}
+if extendedAttributes, ok := res["extendedAttributesOauth2Client"].(map[string]interface{}); ok {
+    if secret, ok := extendedAttributes["clientSecret"].(map[string]interface{}); ok {
+        if value, ok := secret["value"].(map[string]interface{}); ok {
+            if value["thumbprint"] == nil {
+                value["thumbprint"] = ""
+            }
+        }
+    }
+}
+return res, hclData, nil

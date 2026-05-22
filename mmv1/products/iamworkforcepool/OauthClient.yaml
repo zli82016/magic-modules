@@ -13,6 +13,7 @@
 
 ---
 name: OauthClient
+include_in_tgc_next: true
 description: |
   Represents an OAuth Client. Used to access Google Cloud resources on behalf of a
   Workforce Identity Federation user by using OAuth 2.0 Protocol to obtain an access

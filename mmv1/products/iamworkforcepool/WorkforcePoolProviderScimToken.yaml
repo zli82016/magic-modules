@@ -13,6 +13,7 @@
 
 ---
 name: 'WorkforcePoolProviderScimToken'
+include_in_tgc_next: true
 description: |
   Represents a SCIM Token for a Workforce Pool Provider Scim Tenant.
   The SCIM Token is used for authenticating SCIM provisioning requests during the synchronization of user/group identities from external identity provider into Google Cloud using the System for Cross-domain Identity Management (SCIM) protocol. This needs to be provided in the Secret (Long Lived) Token field when configuring SCIM on an IdP.

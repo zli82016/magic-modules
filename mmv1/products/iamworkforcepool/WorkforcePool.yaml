@@ -13,6 +13,7 @@
 
 ---
 name: 'WorkforcePool'
+include_in_tgc_next: true
 description: |
   Represents a collection of external workforces. Provides namespaces for
   federated users that can be referenced in IAM policies.
