@@ -13,6 +13,7 @@
 
 ---
 name: 'Service'
+include_in_tgc_next: true
 description: |
   A managed metastore service that serves metadata queries.
 references:
@@ -50,6 +51,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
 custom_code:
+  constants: 'templates/tgc_next/constants/dataproc_metastore_service_diff_supress.go.tmpl'
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
