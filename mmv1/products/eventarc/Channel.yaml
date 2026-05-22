@@ -13,6 +13,7 @@
 
 ---
 name: Channel
+include_in_tgc_next: true
 legacy_long_form_project: true
 base_url: projects/{{project}}/locations/{{location}}/channels
 create_url: projects/{{project}}/locations/{{location}}/channels?channelId={{name}}
