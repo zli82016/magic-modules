@@ -13,6 +13,7 @@
 
 ---
 name: 'ProjectNotificationConfig'
+include_in_tgc_next: true
 api_resource_type_kind: NotificationConfig
 api_variant_patterns:
   - 'projects/{project}/locations/{location}/notificationConfigs/{notificationConfig}'
@@ -38,6 +39,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_location_and_config_id.go.tmpl'
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
+  tgc_decoder: 'templates/tgc_next/decoders/securitycenter_project_notification_config.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "global"

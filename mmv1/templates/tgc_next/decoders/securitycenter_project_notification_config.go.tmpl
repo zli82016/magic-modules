@@ -1,0 +1,15 @@
+if name, ok := res["name"].(string); ok {
+	fmt.Printf("DECODER_RES_NAME: %s\n", name)
+	pattern := "projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/notificationConfigs/{{ "{{" }}config_id{{ "}}" }}"
+	if strings.HasPrefix(name, "//") {
+		pattern = "//securitycenter.googleapis.com/" + pattern
+	}
+	utils.ParseUrlParamValuesFromAssetName(name, pattern, map[string]struct{}{}, hclData)
+	fmt.Printf("DECODER HCLDATA After Parse: %+v\n", hclData)
+}
+
+return res, hclData, nil
+
+
+
+
